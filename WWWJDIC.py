@@ -1,5 +1,6 @@
 import re
 from bs4 import BeautifulSoup
+<<<<<<< HEAD
 import requests
 import urllib.parse
 import os.path
@@ -20,6 +21,34 @@ class WWWJDIC:
         request_body = {'dsrchkey': urllib.parse.quote(self.word.encode('utf-8')), 'dicsel': '1'}
         return BeautifulSoup(requests.post(url, request_body).content, 'html.parser')
 
+=======
+from selenium.webdriver import Firefox
+from selenium.webdriver.common.by import By
+import requests
+
+class WWWJDIC:
+    def __init__(self, brwsr: Firefox, word: str, sound_download_dir: str) -> None:
+        self.word = word
+        self.allsoup = self.renderWWWJDIC(brwsr)
+        self.bestsoup = self.find_word_definition()
+        self.jap_sentence, self.eng_sentence = self.get_sentence()
+        self.sound_file = sound_download_dir + word + '.mp3'
+        self.get_sound()
+    
+    # Render web page
+    def renderWWWJDIC(self, b: Firefox) -> BeautifulSoup:
+        # Get WWWJDIC homepage
+        url = 'https://www.edrdg.org/cgi-bin/wwwjdic/wwwjdic?1C'
+        b.get(url)
+        # Find form elements
+        search_bar = b.find_element(By.NAME, 'dsrchkey')
+        submit_button = b.find_element(By.XPATH, "//input[@type='submit']")
+        # Fill and submit form
+        search_bar.send_keys(self.word)
+        submit_button.click()
+
+        return BeautifulSoup(b.page_source, 'html.parser')
+>>>>>>> 769a1c9e41757b517dcd5cfe82581806b25386ef
 
     # Get best guess of dict entry
     def find_word_definition(self) -> BeautifulSoup:
@@ -42,18 +71,29 @@ class WWWJDIC:
                 if re.match(re.compile(h), self.word):
                     return e
             
+<<<<<<< HEAD
         # Else raise error
         print(self.word + " could not be found in Jim Breen's WWWJDIC")
         raise
 
 
+=======
+            # Else raise error
+            print(self.word + " could not be found in Jim Breen's WWWJDIC")
+            raise
+    
+>>>>>>> 769a1c9e41757b517dcd5cfe82581806b25386ef
     # Get example sentence and translation
     def get_sentence(self) -> tuple:  
         
         br = self.bestsoup.find('br')
         
         # No sentences...
+<<<<<<< HEAD
         if br is None:
+=======
+        if br is None or br.next_sibling.name == 'a':
+>>>>>>> 769a1c9e41757b517dcd5cfe82581806b25386ef
             return (None, None)
 
         # Possible sentences !
@@ -66,6 +106,7 @@ class WWWJDIC:
         
         return (both_l_re.group('jap'), both_l_re.group('eng'))
 
+<<<<<<< HEAD
 
     # Download sound if any
     def get_sound(self, dir: str):
@@ -93,3 +134,19 @@ class WWWJDIC:
             f.write(soundfile.content)
         
         return soundfile_path
+=======
+    # Download sound if any
+    def get_sound(self):
+        
+        # print(self.bestsoup.prettify())
+        audio_player = self.bestsoup.find('audio')
+        
+        # No sound
+        if audio_player is None:
+            return None
+        
+        # Sound file !
+        soundfile = requests.get(audio_player.find('source')['src'])
+        with open(self.sound_file, 'wb') as f:
+            f.write(soundfile.content)
+>>>>>>> 769a1c9e41757b517dcd5cfe82581806b25386ef
