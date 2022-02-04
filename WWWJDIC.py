@@ -1,6 +1,4 @@
-from dataclasses import replace
-from email import message
-from logging import exception
+from enum import Enum
 import re
 from bs4 import BeautifulSoup
 import requests
@@ -17,6 +15,30 @@ class NoHits(Exception):
         self.message = word + " could not be found AT ALL..."
         super().__init__(self.message)
 
+class WordType(Enum):
+    noun = 0
+    iAdj = 1
+    naAdj = 2
+    godanVerb = 3
+    ichidanVerb = 4
+
+class HitResult:
+    def __init__(self, hittype: WordType, definition: str) -> None:
+        self.type = hittype
+        self.definition = self.clean_up_definition(definition)
+    
+    def clean_up_definition(definition: str) -> str:
+        patterns = [
+            r'\([\d]+\)',
+            r'\(See [^)]+\)',
+            r'\(uk\)',
+            r'\(P\)',
+            r'\(abbr\)'
+        ]
+        for p in patterns:
+            re.sub(p, '', definition)
+        return definition
+
 class WWWJDIC:
     def __init__(self, word: str, sound_download_dir: str, rendered_soup= None, excludedIDs=[]) -> None:
         self.word = word
@@ -31,6 +53,7 @@ class WWWJDIC:
         self.kana = self.get_kana()
         self.jap_sentence, self.eng_sentence = self.get_sentence()
         self.sound_file = self.get_sound(sound_download_dir)
+        self.word_types = self.get_word_type()
     
 
     # Render web page
@@ -61,12 +84,12 @@ class WWWJDIC:
                 headword_str = headword_str + s           
             
             # Regex just the kanji part
-            reg_pattern = r'(?P<hdwrd>^.*)(【.*】|《(?P<kanjiopt>.*)》| )'
+            reg_pattern = r'(?P<hdwrd>^.*)(【.*】|《(?P<kanjiopt>.*)》| |\(P\))'
             hdwrd = re.match(reg_pattern, headword_str).group('hdwrd')
             extra_kanji = re.match(reg_pattern, headword_str).group('kanjiopt')
             if extra_kanji is not None:
                 hdwrd += '; ' + extra_kanji
-            hits = re.findall(r'[^;\s]+', hdwrd)          
+            hits = re.findall(r'[^;\s\(P\)]+', hdwrd)          
             
             # If matches exactly self.word
             for h in hits:
@@ -84,7 +107,10 @@ class WWWJDIC:
     def get_sentence(self) -> tuple:  
         
         br = self.bestsoup.find('br')
-        
+        # No sentences ...
+        if br is None:
+            return(None,None)
+
         # Possible sentences !
         both_l = ''
         for s in br.next_sibling.contents[2:-2]:
@@ -128,9 +154,35 @@ class WWWJDIC:
 
     # Get kana
     def get_kana(self) -> str:
-        kana_url = re.match(r'm\(\'kana=(?P<kana>.+)\&kanji=.*\'\)', self.bestsoup.find('script').text).group('kana')
-        return urllib.parse.unquote(kana_url)
+        kana_url = re.search(r'm\(\'kana=(?P<kana>[^&]+)(\&kanji=.*)?\'\)', self.bestsoup.find('script').text).group('kana')
+        kana = urllib.parse.unquote(kana_url)
+        if kana == self.word:
+            kana = None
+        return kana
 
     # Get unique LabelID
     def get_ID(self) -> str:
         return self.bestsoup.find('input')['id']
+
+    def get_word_type(self) -> list:
+        found_types = {'noun': [], 'godan': [], 'ichidan': [], 'naAdj': [], 'iAdj': []}
+        magic_pattern = r'(?P<noun>\(((n(\)|,?[^)]+))|aux)\))|(?P<godan>\(v5.(\)|,?[^)]+\)))|(?P<ichidan>\(v1.(\)|,?[^)]+\)))|(?P<naAdj>\(adj-na(\)|,?[^)]+\)))|(?P<iAdj>\(adj-i(\)|,?[^)]+\)))'
+        for r in re.finditer(magic_pattern, str(self.bestsoup.find('label').find('font').next_sibling.string)):
+            for t in r.groupdict():
+                if r[t] is not None:
+                    found_types[t].append(r[t])
+
+        output = []
+        if len(found_types['noun']) > 0:
+            output.append(WordType.noun)
+        if len(found_types['godan']) > 0:
+            output.append(WordType.noun)
+        if len(found_types['ichidan']) > 0:
+            output.append(WordType.noun)
+        if len(found_types['naAdj']) > 0:
+            output.append(WordType.noun)
+        if len(found_types['iAdj']) > 0:
+            output.append(WordType.noun)
+
+        return output
+
