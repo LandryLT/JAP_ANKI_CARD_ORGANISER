@@ -5,6 +5,14 @@ import requests
 import urllib.parse
 import os.path
 
+# '(?P<noun>\(((n(\)|,?[^)]+))|aux)\))|(?P<godan>\(v5.(\)|,?[^)]+\)))|(?P<ichidan>\(v1.(\)|,?[^)]+\)))|(?P<naAdj>\(adj-na(\)|,?[^)]+\)))|(?P<iAdj>\(adj-i(\)|,?[^)]+\)))'
+noun_regex = r'(?P<noun>\(((n(|,[^)]+))|aux)\))'
+godan_regex = r'(?P<godan>\(v5.(|,[^)]+)\))'
+ichidan_regex = r'(?P<ichidan>\(v1.(|,[^)]+)\))'
+naAdj_regex = r'(?P<naAdj>\(adj-na(|,[^)]+)\))'
+iAdj_regex = r'(?P<iAdj>\(adj-i(|,[^)]+)\))'
+wordtype_regex = re.compile(noun_regex + '|' + godan_regex + '|' + ichidan_regex + '|' + naAdj_regex + '|' + iAdj_regex)
+
 class NoMoreHits(Exception):
     def __init__(self, word) -> None:
         self.message = "No more " + word + " could be found"
@@ -37,6 +45,7 @@ class HitResult:
         ]
         for p in patterns:
             re.sub(p, '', definition)
+
         return definition
 
 class WWWJDIC:
@@ -54,6 +63,7 @@ class WWWJDIC:
         self.jap_sentence, self.eng_sentence = self.get_sentence()
         self.sound_file = self.get_sound(sound_download_dir)
         self.word_types = self.get_word_type()
+        self.definitions = self.get_definitions()
     
 
     # Render web page
@@ -165,9 +175,8 @@ class WWWJDIC:
         return self.bestsoup.find('input')['id']
 
     def get_word_type(self) -> list:
-        found_types = {'noun': [], 'godan': [], 'ichidan': [], 'naAdj': [], 'iAdj': []}
-        magic_pattern = r'(?P<noun>\(((n(\)|,?[^)]+))|aux)\))|(?P<godan>\(v5.(\)|,?[^)]+\)))|(?P<ichidan>\(v1.(\)|,?[^)]+\)))|(?P<naAdj>\(adj-na(\)|,?[^)]+\)))|(?P<iAdj>\(adj-i(\)|,?[^)]+\)))'
-        for r in re.finditer(magic_pattern, str(self.bestsoup.find('label').find('font').next_sibling.string)):
+        found_types = {'noun': [], 'godan': [], 'ichidan': [], 'naAdj': [], 'iAdj': []}        
+        for r in re.finditer(wordtype_regex, str(self.bestsoup.find('label').find('font').next_sibling.string)):
             for t in r.groupdict():
                 if r[t] is not None:
                     found_types[t].append(r[t])
@@ -186,3 +195,7 @@ class WWWJDIC:
 
         return output
 
+# TO DO
+    def get_definitions(self) -> list:
+        hits = []
+        return hits
