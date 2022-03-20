@@ -5,13 +5,14 @@ import requests
 import urllib.parse
 import os.path
 
-# '(?P<noun>\(((n(\)|,?[^)]+))|aux)\))|(?P<godan>\(v5.(\)|,?[^)]+\)))|(?P<ichidan>\(v1.(\)|,?[^)]+\)))|(?P<naAdj>\(adj-na(\)|,?[^)]+\)))|(?P<iAdj>\(adj-i(\)|,?[^)]+\)))'
+# '(?P<noun>\(((n(|,[^)]+))|aux)\))|(?P<godan>\(v5.(\)|,?[^)]+\)))|(?P<ichidan>\(v1.(\)|,?[^)]+\)))|(?P<naAdj>\(adj-na(\)|,?[^)]+\)))|(?P<iAdj>\(adj-i(\)|,?[^)]+\)))'
 noun_regex = r'(?P<noun>\(((n(|,[^)]+))|aux)\))'
 godan_regex = r'(?P<godan>\(v5.(|,[^)]+)\))'
 ichidan_regex = r'(?P<ichidan>\(v1.(|,[^)]+)\))'
-naAdj_regex = r'(?P<naAdj>\(adj-na(|,[^)]+)\))'
+naAdj_regex = r'(?P<naAdj>\([^\(]*,adj-na\)|\(adj-na(\)|,?[^)]+\)))'
 iAdj_regex = r'(?P<iAdj>\(adj-i(|,[^)]+)\))'
-wordtype_regex = re.compile(noun_regex + '|' + godan_regex + '|' + ichidan_regex + '|' + naAdj_regex + '|' + iAdj_regex)
+wordtype_noun_regex = re.compile(noun_regex)
+wordtype_regex_no_noun = re.compile(godan_regex + '|' + ichidan_regex + '|' + naAdj_regex + '|' + iAdj_regex)
 
 class NoMoreHits(Exception):
     def __init__(self, word) -> None:
@@ -62,6 +63,7 @@ class WWWJDIC:
         self.kana = self.get_kana()
         self.jap_sentence, self.eng_sentence = self.get_sentence()
         self.sound_file = self.get_sound(sound_download_dir)
+        self.rough_def = self.get_rough_def()
         self.word_types = self.get_word_type()
         self.definitions = self.get_definitions()
     
@@ -174,9 +176,26 @@ class WWWJDIC:
     def get_ID(self) -> str:
         return self.bestsoup.find('input')['id']
 
+    def get_rough_def(self) -> str:
+        # Sometimes <a> muck it up (stops to first sibling)
+        bestsoup_def = self.bestsoup.find('label').find('font').next_sibling
+        bestsou_def_str = ''
+        while bestsoup_def is not None:
+            bestsou_def_str += str(bestsoup_def.string)
+            bestsoup_def = bestsoup_def.next_sibling
+        
+        return bestsou_def_str
+
+
+    # Get word types (something is wrong with nouns, i'm drunk)
     def get_word_type(self) -> list:
-        found_types = {'noun': [], 'godan': [], 'ichidan': [], 'naAdj': [], 'iAdj': []}        
-        for r in re.finditer(wordtype_regex, str(self.bestsoup.find('label').find('font').next_sibling.string)):
+        found_types = {'noun': [], 'godan': [], 'ichidan': [], 'naAdj': [], 'iAdj': []} 
+        # Need to seperate nouns and na-adj because they can be the same
+        for r in re.finditer(wordtype_regex_no_noun, self.rough_def):
+            for t in r.groupdict():
+                if r[t] is not None:
+                    found_types[t].append(r[t])
+        for r in re.finditer(wordtype_noun_regex, self.rough_def):
             for t in r.groupdict():
                 if r[t] is not None:
                     found_types[t].append(r[t])
@@ -185,13 +204,13 @@ class WWWJDIC:
         if len(found_types['noun']) > 0:
             output.append(WordType.noun)
         if len(found_types['godan']) > 0:
-            output.append(WordType.noun)
+            output.append(WordType.godanVerb)
         if len(found_types['ichidan']) > 0:
-            output.append(WordType.noun)
+            output.append(WordType.ichidanVerb)
         if len(found_types['naAdj']) > 0:
-            output.append(WordType.noun)
+            output.append(WordType.naAdj)
         if len(found_types['iAdj']) > 0:
-            output.append(WordType.noun)
+            output.append(WordType.iAdj)
 
         return output
 
