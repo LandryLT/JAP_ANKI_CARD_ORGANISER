@@ -1,7 +1,7 @@
 import ssl
 from KanjiSljfaq import KanjiSljfaq
 from WWWJDIC import WWWJDIC, NoHits, NoMoreHits
-from ankiReader import get_existing_kanji_list
+from AnkiReader import get_existing_kanji_list
 import os
 
 #///////////////////////////////////////////////////////////////////
