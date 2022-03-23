@@ -1,4 +1,3 @@
-from typing import List
 from HitResult import *
 from bs4 import BeautifulSoup
 import requests
@@ -52,7 +51,7 @@ class WWWJDIC:
                 headword_str = headword_str + s           
             
             # Regex just the kanji part
-            reg_pattern = r'(?P<hdwrd>^.*)(【.*】|《(?P<kanjiopt>.*)》| |\(P\))'
+            reg_pattern = r'(?P<hdwrd>^.*)(【.*】|《(?P<kanjiopt>.*)》||\(P\))'
             hdwrd = re.match(reg_pattern, headword_str).group('hdwrd')
             extra_kanji = re.match(reg_pattern, headword_str).group('kanjiopt')
             if extra_kanji is not None:
