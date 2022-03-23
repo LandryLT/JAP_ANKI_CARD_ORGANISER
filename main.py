@@ -24,18 +24,19 @@ word_6 = '無事'
 #     list_kan.append(c)
 # newKan = KanjiSljfaq(list_kan)
 try:
-    word_def = WWWJDIC(word_4, "./.sounds/")
+    word_def = WWWJDIC(word_6, "./.sounds/")
 except NoHits:
     raise
 except NoMoreHits as e:
     print(e)
 
 # Print stuff
-print(word_def.labelID)
-print(word_def.word_types)
-print(word_def.word)
-print(word_def.kana)
-print(word_def.jap_sentence)
-print(word_def.eng_sentence)
-print(word_def.sound_file)
+# print(word_def.labelID)
+for h in word_def.hits:
+    print(str(h.type) + ": " + h.definition)
+# print(word_def.word)
+# print(word_def.kana)
+# print(word_def.jap_sentence)
+# print(word_def.eng_sentence)
+# print(word_def.sound_file)
 

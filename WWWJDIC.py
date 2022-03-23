@@ -1,53 +1,8 @@
-from enum import Enum
-import re
+from HitResult import *
 from bs4 import BeautifulSoup
 import requests
 import urllib.parse
 import os.path
-
-# '(?P<noun>\(((n(|,[^)]+))|aux)\))|(?P<godan>\(v5.(\)|,?[^)]+\)))|(?P<ichidan>\(v1.(\)|,?[^)]+\)))|(?P<naAdj>\(adj-na(\)|,?[^)]+\)))|(?P<iAdj>\(adj-i(\)|,?[^)]+\)))'
-noun_regex = r'(?P<noun>\(((n(|,[^)]+))|aux)\))'
-godan_regex = r'(?P<godan>\(v5.(|,[^)]+)\))'
-ichidan_regex = r'(?P<ichidan>\(v1.(|,[^)]+)\))'
-naAdj_regex = r'(?P<naAdj>\([^\(]*,adj-na\)|\(adj-na(\)|,?[^)]+\)))'
-iAdj_regex = r'(?P<iAdj>\(adj-i(|,[^)]+)\))'
-wordtype_noun_regex = re.compile(noun_regex)
-wordtype_regex_no_noun = re.compile(godan_regex + '|' + ichidan_regex + '|' + naAdj_regex + '|' + iAdj_regex)
-
-class NoMoreHits(Exception):
-    def __init__(self, word) -> None:
-        self.message = "No more " + word + " could be found"
-        super().__init__(self.message)
-
-class NoHits(Exception):
-    def __init__(self, word) -> None:
-        self.message = word + " could not be found AT ALL..."
-        super().__init__(self.message)
-
-class WordType(Enum):
-    noun = 0
-    iAdj = 1
-    naAdj = 2
-    godanVerb = 3
-    ichidanVerb = 4
-
-class HitResult:
-    def __init__(self, hittype: WordType, definition: str) -> None:
-        self.type = hittype
-        self.definition = self.clean_up_definition(definition)
-    
-    def clean_up_definition(definition: str) -> str:
-        patterns = [
-            r'\([\d]+\)',
-            r'\(See [^)]+\)',
-            r'\(uk\)',
-            r'\(P\)',
-            r'\(abbr\)'
-        ]
-        for p in patterns:
-            re.sub(p, '', definition)
-
-        return definition
 
 class WWWJDIC:
     def __init__(self, word: str, sound_download_dir: str, rendered_soup= None, excludedIDs=[]) -> None:
@@ -64,8 +19,7 @@ class WWWJDIC:
         self.jap_sentence, self.eng_sentence = self.get_sentence()
         self.sound_file = self.get_sound(sound_download_dir)
         self.rough_def = self.get_rough_def()
-        self.word_types = self.get_word_type()
-        self.definitions = self.get_definitions()
+        self.hits = self.get_hits()
     
 
     # Render web page
@@ -186,35 +140,37 @@ class WWWJDIC:
         
         return bestsou_def_str
 
-
-    # Get word types (something is wrong with nouns, i'm drunk)
-    def get_word_type(self) -> list:
-        found_types = {'noun': [], 'godan': [], 'ichidan': [], 'naAdj': [], 'iAdj': []} 
-        # Need to seperate nouns and na-adj because they can be the same
-        for r in re.finditer(wordtype_regex_no_noun, self.rough_def):
+    # Gets definitions and corresponding wordtypes (Hits)
+    def get_hits(self) -> list:
+        # Get all rough definitions with "(wordtype) definition" format 
+        found_defs = []        
+        for r in re.finditer(final_regex, self.rough_def):
             for t in r.groupdict():
                 if r[t] is not None:
-                    found_types[t].append(r[t])
-        for r in re.finditer(wordtype_noun_regex, self.rough_def):
-            for t in r.groupdict():
-                if r[t] is not None:
-                    found_types[t].append(r[t])
+                    found_defs.append(r[t])
 
-        output = []
-        if len(found_types['noun']) > 0:
-            output.append(WordType.noun)
-        if len(found_types['godan']) > 0:
-            output.append(WordType.godanVerb)
-        if len(found_types['ichidan']) > 0:
-            output.append(WordType.ichidanVerb)
-        if len(found_types['naAdj']) > 0:
-            output.append(WordType.naAdj)
-        if len(found_types['iAdj']) > 0:
-            output.append(WordType.iAdj)
-
-        return output
-
-# TO DO
-    def get_definitions(self) -> list:
+        # Seperate into different wordtypes
+        wordtype_def = {'noun': '', 'godan': '', 'ichidan': '', 'naAdj': '', 'iAdj': ''}
+        for d in found_defs:
+            for k in wordtypes_regex:
+                wordtype = re.match(wordtypes_regex[k], d)
+                if wordtype is not None:
+                    wordtype_def[k] += re.sub(wordtypes_regex[k], "", d)
+        
+        # Transform into hits
         hits = []
+        for wt in wordtype_def:
+            d = wordtype_def[wt] 
+            if len(d) > 0:
+                if wt == 'noun':
+                    hits.append(HitResult(WordType.noun, d))
+                elif wt == 'naAdj':
+                    hits.append(HitResult(WordType.naAdj, d))
+                elif wt == 'iAdj':
+                    hits.append(HitResult(WordType.iAdj, d))
+                elif wt == 'godan':
+                    hits.append(HitResult(WordType.godanVerb, d))
+                elif wt == 'ichidan':
+                    hits.append(HitResult(WordType.ichidanVerb, d))
+        
         return hits
