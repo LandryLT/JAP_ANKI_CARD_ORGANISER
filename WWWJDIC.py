@@ -1,3 +1,4 @@
+from typing import List
 from HitResult import *
 from bs4 import BeautifulSoup
 import requests
@@ -16,6 +17,7 @@ class WWWJDIC:
         self.bestsoup = self.find_word_definition(excludedIDs)
         self.labelID = self.get_ID()
         self.kana = self.get_kana()
+        self.kanjis = self.get_kanjis()
         self.jap_sentence, self.eng_sentence = self.get_sentence()
         self.sound_file = self.get_sound(sound_download_dir)
         self.rough_def = self.get_rough_def()
@@ -82,7 +84,7 @@ class WWWJDIC:
         for s in br.next_sibling.contents[2:-2]:
             both_l = both_l + str(s)
         
-        # Seperate Japanes and English
+        # Seperate Japanese and English
         both_l_re = re.match(r'(?P<jap>^.*)(\t)(?P<eng>.*$)', both_l)
         if both_l_re is None:
             return (None, None)
@@ -126,6 +128,14 @@ class WWWJDIC:
             kana = None
         return kana
 
+
+    # Get a list of the Kanjis
+    def get_kanjis(self):
+        output = []
+        for r in re.findall(r'[一-龯]', self.word):
+            output.append(r)
+        return output
+
     # Get unique LabelID
     def get_ID(self) -> str:
         return self.bestsoup.find('input')['id']
@@ -139,6 +149,7 @@ class WWWJDIC:
             bestsoup_def = bestsoup_def.next_sibling
         
         return bestsou_def_str
+
 
     # Gets definitions and corresponding wordtypes (Hits)
     def get_hits(self) -> list:
