@@ -42,6 +42,7 @@ class WordType(Enum):
     naAdj = 2
     godanVerb = 3
     ichidanVerb = 4
+    dunno = 5
 
 class HitResult:
     def __init__(self, hittype: WordType, definition: str) -> None:

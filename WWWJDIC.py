@@ -3,6 +3,7 @@ from bs4 import BeautifulSoup
 import requests
 import urllib.parse
 import os.path
+from KanjiSljfaq import KanjiSljfaq
 
 class WWWJDIC:
     def __init__(self, word: str, sound_download_dir: str, rendered_soup= None, excludedIDs=[]) -> None:
@@ -13,14 +14,18 @@ class WWWJDIC:
         if self.allsoup is None:
             self.allsoup = self.renderWWWJDIC()
         
+        # 
         self.bestsoup = self.find_word_definition(excludedIDs)
         self.labelID = self.get_ID()
-        self.kana = self.get_kana()
+        self.rough_def = self.get_rough_def()
+        
+        # Interesting data
+        self.hits = self.get_hits()
         self.kanjis = self.get_kanjis()
+        self.kanji_stroke_orders = KanjiSljfaq(self.kanjis)
+        self.kana = self.get_kana()
         self.jap_sentence, self.eng_sentence = self.get_sentence()
         self.sound_file = self.get_sound(sound_download_dir)
-        self.rough_def = self.get_rough_def()
-        self.hits = self.get_hits()
     
 
     # Render web page
