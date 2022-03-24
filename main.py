@@ -28,7 +28,10 @@ ssl._create_default_https_context = ssl._create_unverified_context
 words_to_add = []
 try:
     with open(vocabfile, 'r', encoding='utf-8') as f:
-        words_to_add = f.read().splitlines()
+        for w in f.read().splitlines():
+            # Python style comment out
+            if w[0] != '#':
+                words_to_add.append(w)
 except FileNotFoundError:
     raise
 
@@ -47,22 +50,11 @@ for w in words_to_add:
 
 # Make the new deck
 
-
-# word_1 = '新婦'
-# word_2 = 'する'
-# word_3 = '滑る'
-# word_4 = '勉強'
-# word_5 = 'なら'
-# word_6 = '無事'
-# list_kan = []
-# for c in word:
-#     list_kan.append(c)
-# newKan = KanjiSljfaq(list_kan)
-
 # # Print stuff
 # print(word_def.labelID)
-# for h in word_def.hits:
-#     print(str(h.type) + ": " + h.definition)
+for w in JDIC_words:
+    for h in w.hits:
+        print(w.word + ": " + str(h.type) + ": " + h.definition)
 # print(word_def.kanjis)
 # print(word_def.word)
 # print(word_def.kana)
