@@ -158,14 +158,18 @@ class WWWJDIC:
     # Gets definitions and corresponding wordtypes (Hits)
     def get_hits(self) -> list:
         # Get all rough definitions with "(wordtype) definition" format 
-        found_defs = []        
+        found_defs = []
         for r in re.finditer(final_regex, self.rough_def):
             for t in r.groupdict():
                 if r[t] is not None:
                     found_defs.append(r[t])
-
+        
+        # Undefined type :/
+        if len(found_defs) == 0:
+            found_defs.append('(dunno)' + self.rough_def)
+        
         # Seperate into different wordtypes
-        wordtype_def = {'noun': '', 'godan': '', 'ichidan': '', 'naAdj': '', 'iAdj': ''}
+        wordtype_def = {'noun': '', 'godan': '', 'ichidan': '', 'naAdj': '', 'iAdj': '', 'dunno': ''}
         for d in found_defs:
             for k in wordtypes_regex:
                 wordtype = re.match(wordtypes_regex[k], d)
@@ -187,5 +191,7 @@ class WWWJDIC:
                     hits.append(HitResult(WordType.godanVerb, d))
                 elif wt == 'ichidan':
                     hits.append(HitResult(WordType.ichidanVerb, d))
+                elif wt == 'dunno':
+                    hits.append(HitResult(WordType.dunno, d))
         
         return hits

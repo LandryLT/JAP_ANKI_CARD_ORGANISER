@@ -3,7 +3,6 @@ import urllib.parse, urllib.request
 from PIL import Image
 import io
 
-# 
 class KanjiSljfaq:
     def __init__(self, kanji_l: list) -> None:
         self.url = 'https://kanji.sljfaq.org/kanjivg/memory.cgi?k='

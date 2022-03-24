@@ -6,12 +6,14 @@ godan_regex = r'(\(v5.(|,[^)]+)\))'
 ichidan_regex = r'(\(v1.(|,[^)]+)\))'
 naAdj_regex = r'(\([^\(]*,adj-na\)|\(adj-na(\)|,?[^)]+\)))'
 iAdj_regex = r'(\(adj-i(|,[^)]+)\))'
+dunno_regex = r'(\(dunno\))'
 
 wordtypes_regex = {'noun': noun_regex,\
     'godan': godan_regex,\
     'ichidan': ichidan_regex,\
     'naAdj': naAdj_regex,\
-    'iAdj': iAdj_regex}
+    'iAdj': iAdj_regex,\
+    'dunno': dunno_regex}
 
 final_regex = r'(?P<definition>(' +\
     noun_regex + r'|' +\

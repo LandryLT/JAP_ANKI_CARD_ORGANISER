@@ -34,16 +34,19 @@ from WWWJDIC import WWWJDIC
 # id: 1648138030648
 # name: Staging::漢字
 
+# id: 1648149080423
+# name: "Staging::dunno"
+
 #//////////////////////////////////////////////
 
 cpath = "C:\\Users\\landr\\AppData\\Roaming\\Anki2\\User 1\\collection.anki2"
 
 col = Collection(cpath)
-print(type(col.models.get(1611940348229)))
+print(col.decks.all_names_and_ids())
 
 kanji_template = col.models.get(1622109327921)
 verb_template = col.models.get(1611835394471)
 adj_template = col.models.get(1611940348229)
 
-print(col.new_note(kanji_template))
+# print(col.new_note(kanji_template))
 

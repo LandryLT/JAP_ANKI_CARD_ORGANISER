@@ -2,6 +2,7 @@ import ssl
 from KanjiSljfaq import KanjiSljfaq
 from WWWJDIC import WWWJDIC, NoHits, NoMoreHits
 from AnkiReader import get_existing_kanji_list
+from NewKanjis import NewKanji, get_new_kanjis
 import os
 
 #///////////////////////////////////////////////////////////////////
@@ -16,7 +17,7 @@ soundfolder = os.path.join(working_dir, ".sounds/")
 newdecksfolder = os.path.join(working_dir, ".new_decks/")
 # Existing Kanji :
 cpath = "C:\\Users\\landr\\AppData\\Roaming\\Anki2\\User 1\\collection.anki2"
-existing_kanjis = get_existing_kanji_list(cpath)
+
 # THIS KANJI 龯 IS A NICE EXAMPLE OF BUGGY KANJI
 
 #///////////////////////////////////////////////////////////////////
@@ -48,14 +49,24 @@ for w in words_to_add:
     except FileNotFoundError:
         raise
 
+# Make new Kanji Card
+NewKanjiCards = []
+existing_kanjis = get_existing_kanji_list(cpath)
+for k in get_new_kanjis(existing_kanjis, JDIC_words):
+    (print("new Kanji: " + k + " !"))
+    NewKanjiCards.append(NewKanji(k))
+
 # Make the new deck
 
 # # Print stuff
 # print(word_def.labelID)
-for w in JDIC_words:
-    for h in w.hits:
-        print(w.word + ": " + str(h.type) + ": " + h.definition)
-# print(word_def.kanjis)
+# for w in JDIC_words:
+#     for h in w.hits:
+#         if w.kana is not None:
+#             print(w.word + " (" + w.kana + ") : " + str(h.type) + ": " + h.definition)
+#         else:
+#             print(w.word + ": " + str(h.type) + ": " + h.definition)
+# # print(word_def.kanjis)
 # print(word_def.word)
 # print(word_def.kana)
 # print(word_def.jap_sentence)
