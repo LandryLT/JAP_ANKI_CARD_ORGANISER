@@ -4,6 +4,7 @@ import requests
 import urllib.parse
 import os.path
 from KanjiSljfaq import KanjiSljfaq
+from NewDef import NewVerb, newAdj
 
 class WWWJDIC:
     def __init__(self, word: str, sound_download_dir: str, rendered_soup= None, excludedIDs=[]) -> None:
@@ -26,6 +27,9 @@ class WWWJDIC:
         self.kana = self.get_kana()
         self.jap_sentence, self.eng_sentence = self.get_sentence()
         self.sound_file = self.get_sound(sound_download_dir)
+
+        # List def 
+        self.clean_definitions = self.make_clean_defs()
     
 
     # Render web page
@@ -169,12 +173,20 @@ class WWWJDIC:
             found_defs.append('(dunno)' + self.rough_def)
         
         # Seperate into different wordtypes
-        wordtype_def = {'noun': '', 'godan': '', 'ichidan': '', 'naAdj': '', 'iAdj': '', 'dunno': ''}
+        wordtype_def = {'noun': '', 'godan': ['',''], 'ichidan': ['',''], 'naAdj': '', 'iAdj': '', 'dunno': ''}        
         for d in found_defs:
-            for k in wordtypes_regex:
+            for k in wordtypes_regex:                
                 wordtype = re.match(wordtypes_regex[k], d)
                 if wordtype is not None:
-                    wordtype_def[k] += re.sub(wordtypes_regex[k], "", d)
+                    # Nasty hack happening here to get transitivness :/
+                    if k in ['godan', 'ichidan']:
+                        t = re.findall(r'(?<=,v)[i|t]', d)
+                        if len(t) == 0:
+                            t=['']
+                        wordtype_def[k][0] += t[0]
+                        wordtype_def[k][1] += re.sub(wordtypes_regex[k], "", d)
+                    else:
+                        wordtype_def[k] += re.sub(wordtypes_regex[k], "", d)
         
         # Transform into hits
         hits = []
@@ -187,11 +199,35 @@ class WWWJDIC:
                     hits.append(HitResult(WordType.naAdj, d))
                 elif wt == 'iAdj':
                     hits.append(HitResult(WordType.iAdj, d))
-                elif wt == 'godan':
-                    hits.append(HitResult(WordType.godanVerb, d))
-                elif wt == 'ichidan':
-                    hits.append(HitResult(WordType.ichidanVerb, d))
+                # Weird shit happening here to get transitivness :/
+                elif wt == 'godan' and len(d[1]) > 0:
+                    hits.append(HitResult(WordType.godanVerb, d[1], d[0]))
+                elif wt == 'ichidan' and len(d[1]) > 0:
+                    hits.append(HitResult(WordType.ichidanVerb, d[1], d[0]))
                 elif wt == 'dunno':
                     hits.append(HitResult(WordType.dunno, d))
         
         return hits
+
+    def make_clean_defs(self) -> list:
+        clean_defs = []
+        for h in self.hits:
+
+            if type(h) is not HitResult:
+                raise TypeError
+
+            if h.type in [ WordType.iAdj, WordType.naAdj, WordType.dunno, WordType.noun ]:
+            
+                nDef = newAdj(h.definition, h.type, self.kanjis, self.kana,\
+                self.eng_sentence, self.jap_sentence, self.kanji_stroke_orders, self.sound_file)                
+            
+                clean_defs.append(nDef)
+            
+            elif h.type in [WordType.godanVerb, WordType.ichidanVerb]:
+                nDef = NewVerb(h.definition, h.type, self.kanjis, self.kana,\
+                self.eng_sentence, self.jap_sentence, self.kanji_stroke_orders, self.sound_file, h.transitivness)
+
+                clean_defs.append(nDef)
+
+        return clean_defs
+
