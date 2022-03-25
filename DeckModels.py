@@ -3,6 +3,7 @@ from anki.storage import Collection
 from anki.models import NotetypeDict
 import json
 from WWWJDIC import WWWJDIC
+from NewKanjis import NewKanji
 
 #//////////////////////////////////////////////
 # MODELS
@@ -42,11 +43,35 @@ from WWWJDIC import WWWJDIC
 cpath = "C:\\Users\\landr\\AppData\\Roaming\\Anki2\\User 1\\collection.anki2"
 
 col = Collection(cpath)
-print(col.decks.all_names_and_ids())
 
 kanji_template = col.models.get(1622109327921)
 verb_template = col.models.get(1611835394471)
 adj_template = col.models.get(1611940348229)
+
+kanji_deck = col.decks.get(1648138030648)
+iAdj_deck = col.decks.get(1648138176442)
+naAdj_deck = col.decks.get(1648138208073)
+noun_deck = col.decks.get(1648138030648)
+godan_deck = col.decks.get(1648138252325)
+ichidan_deck = col.decks.get(1648138267373)
+dunno_deck = col.decks.get(1648149080423)
+
+def make_ankiKanjiNote(nk: NewKanji):    
+    note = col.new_note(kanji_template)
+    note.fields[0] = nk.english
+    note.fields[1] = nk.kanji
+    note.fields[2] = nk.kanji_stroke_orders
+    note.fields[3] = nk.kunyomi
+    note.fields[4] = nk.onyomi
+
+    return note
+
+# DO THIS YOU DRUNKARD
+def make_adj_note(jdic: WWWJDIC):
+    pass
+
+demon = make_ankiKanjiNote(NewKanji('鬼'))
+print(demon.fields[4])
 
 # print(col.new_note(kanji_template))
 

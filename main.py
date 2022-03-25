@@ -58,6 +58,7 @@ for k in get_new_kanjis(existing_kanjis, JDIC_words):
 
 # Make the new deck
 
+
 # # Print stuff
 # print(word_def.labelID)
 # for w in JDIC_words:
