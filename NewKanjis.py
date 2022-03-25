@@ -33,7 +33,13 @@ class NewKanji:
         # Get WWWJDIC kanji homepage
         url = 'https://www.edrdg.org/cgi-bin/wwwjdic/wwwjdic?1D'
         request_body = {'ksrchkey': urllib.parse.quote(self.kanji.encode('utf-8')), 'kanjsel': 'X', 'strcnt': ''}
-        return BeautifulSoup(requests.post(url, request_body).content, 'html.parser').find("form", id="inp").find("label")
+        
+        try:
+            outputsoup = BeautifulSoup(requests.post(url, request_body).content, 'html.parser').find("form", id="inp").find("label")
+        except:
+            raise
+        
+        return outputsoup
 
     def get_on(self):
         for s in self.soup.next_siblings:

@@ -1,5 +1,6 @@
 from enum import Enum
 import re
+from tkinter.messagebox import NO
 
 noun_regex = r'(\(((n(|,[^)]+))|aux)\))'
 godan_regex = r'(\(v5.(|,[^)]+)\))'
@@ -47,10 +48,21 @@ class WordType(Enum):
     dunno = 5
 
 class HitResult:
-    def __init__(self, hittype: WordType, definition: str) -> None:
+    def __init__(self, hittype: WordType, definition: str, transitivness: str = None) -> None:
         self.type = hittype
+        self.transitivness = HitResult.cleanup_transitivness(transitivness)
         self.definition = HitResult.clean_up_definition(definition)
     
+    def cleanup_transitivness(transitivness):
+        if transitivness is None:
+            return None
+        if len(re.findall(r'i', transitivness)) > 0 and len(re.findall(r't', transitivness)) > 0:
+            return '他動詞と自動車'
+        elif len(re.findall(r'i', transitivness)) > 0:
+            return '自動車'
+        elif len(re.findall(r't', transitivness)) > 0:
+            return '他動詞'
+
     def clean_up_definition(definition: str) -> str:
         patterns = [
             r'\([\d]+\)',

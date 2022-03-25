@@ -1,9 +1,8 @@
-from base64 import decode, encode
 from anki.storage import Collection
-from anki.models import NotetypeDict
-import json
+from anki.notes import Note
 from WWWJDIC import WWWJDIC
 from NewKanjis import NewKanji
+import io
 
 #//////////////////////////////////////////////
 # MODELS
@@ -56,22 +55,35 @@ godan_deck = col.decks.get(1648138252325)
 ichidan_deck = col.decks.get(1648138267373)
 dunno_deck = col.decks.get(1648149080423)
 
-def make_ankiKanjiNote(nk: NewKanji):    
+def make_ankiKanjiNote(nk: NewKanji) -> Note:    
     note = col.new_note(kanji_template)
     note.fields[0] = nk.english
     note.fields[1] = nk.kanji
-    note.fields[2] = nk.kanji_stroke_orders
     note.fields[3] = nk.kunyomi
     note.fields[4] = nk.onyomi
+
+    img_byte_arr = io.BytesIO()
+    nk.kanji_stroke_orders.img[0].save(img_byte_arr, format='PNG')
+    img_byte_arr = img_byte_arr.getvalue()
+    strk_order_f = col.media.write_data(nk.kanji + '.png', img_byte_arr)
+    note.fields[2] = '<div><img src="' + strk_order_f +'"></div>'
+    
+    col.add_note(note, kanji_deck['id'])
 
     return note
 
 # DO THIS YOU DRUNKARD
-def make_adj_note(jdic: WWWJDIC):
-    pass
+# def make_adj_note(jdic: dict) -> Note:
+#     note = col.new_note(kanji_template)
+#     note.fields[0] = jdic['']
+#     note.fields[1] = jdic.kanji
 
-demon = make_ankiKanjiNote(NewKanji('鬼'))
-print(demon.fields[4])
+#     note.fields[3] = nk.kunyomi
+#     note.fields[4] = nk.onyomi
 
-# print(col.new_note(kanji_template))
 
+col.autosave()
+
+# print(col.decks.cids(1611363338011))
+# aKan = col.get_card(1634656883987)
+# print(aKan.note().fields[2])
