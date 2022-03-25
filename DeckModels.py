@@ -1,6 +1,8 @@
+import random
 from anki.storage import Collection
 from anki.notes import Note
-from WWWJDIC import WWWJDIC
+from HitResult import WordType
+from NewDef import newAdj
 from NewKanjis import NewKanji
 import io
 
@@ -38,52 +40,83 @@ import io
 # name: "Staging::dunno"
 
 #//////////////////////////////////////////////
+class DeckBuilder:
+    def __init__(self, col: Collection) -> None:        
 
-cpath = "C:\\Users\\landr\\AppData\\Roaming\\Anki2\\User 1\\collection.anki2"
+        self.col = col
 
-col = Collection(cpath)
+        self.kanji_template = col.models.get(1622109327921)
+        self.verb_template = col.models.get(1611835394471)
+        self.adj_template = col.models.get(1611940348229)
+        self.kanji_deck = col.decks.get(1648138030648)
+        self.iAdj_deck = col.decks.get(1648138176442)
+        self.naAdj_deck = col.decks.get(1648138208073)
+        self.noun_deck = col.decks.get(1648138030648)
+        self.godan_deck = col.decks.get(1648138252325)
+        self.ichidan_deck = col.decks.get(1648138267373)
+        self.dunno_deck = col.decks.get(1648149080423)
 
-kanji_template = col.models.get(1622109327921)
-verb_template = col.models.get(1611835394471)
-adj_template = col.models.get(1611940348229)
+    def make_ankiKanjiNote(self, nk: NewKanji) -> Note:    
+        note = self.col.new_note(self.kanji_template)
+        note.fields[0] = nk.english
+        note.fields[1] = nk.kanji
+        note.fields[3] = nk.kunyomi
+        note.fields[4] = nk.onyomi
 
-kanji_deck = col.decks.get(1648138030648)
-iAdj_deck = col.decks.get(1648138176442)
-naAdj_deck = col.decks.get(1648138208073)
-noun_deck = col.decks.get(1648138030648)
-godan_deck = col.decks.get(1648138252325)
-ichidan_deck = col.decks.get(1648138267373)
-dunno_deck = col.decks.get(1648149080423)
+        img_byte_arr = io.BytesIO()
+        nk.kanji_stroke_orders.img[0].save(img_byte_arr, format='PNG')
+        img_byte_arr = img_byte_arr.getvalue()
+        strk_order_f = self.col.media.write_data(nk.kanji + '.png', img_byte_arr)
+        note.fields[2] = '<div><img src="' + strk_order_f +'"></div>'
+        
+        self.col.add_note(note, self.kanji_deck['id'])
 
-def make_ankiKanjiNote(nk: NewKanji) -> Note:    
-    note = col.new_note(kanji_template)
-    note.fields[0] = nk.english
-    note.fields[1] = nk.kanji
-    note.fields[3] = nk.kunyomi
-    note.fields[4] = nk.onyomi
+        return note
 
-    img_byte_arr = io.BytesIO()
-    nk.kanji_stroke_orders.img[0].save(img_byte_arr, format='PNG')
-    img_byte_arr = img_byte_arr.getvalue()
-    strk_order_f = col.media.write_data(nk.kanji + '.png', img_byte_arr)
-    note.fields[2] = '<div><img src="' + strk_order_f +'"></div>'
-    
-    col.add_note(note, kanji_deck['id'])
+    def make_ankiAdjNote(self, jdic: newAdj) -> Note:
+        note = self.col.new_note(self.adj_template)
+        note.fields[0] = jdic.definition
+        note.fields[1] = jdic.kanji
+        note.fields[2] = jdic.kana    
+        note.fields[3] = jdic.ja_sentence
+        note.fields[4] = jdic.en_sentence
+        note.fields[5] = ''
+        if len(jdic.stroke_order.img) > 0:
+            note.fields[5] += '<div>'
+            for i in jdic.stroke_order.img:
+                img_byte_arr = io.BytesIO()
+                i.save(img_byte_arr, format='PNG')
+                img_byte_arr = img_byte_arr.getvalue()
+                strk_order_f = self.col.media.write_data(str(random.randint(0, 9999999999999)) + '.png', img_byte_arr)
+                note.fields[5] += '<img src="' + strk_order_f +'">'
+            note.fields[5] += '</div>'
+        
+        if jdic.soundf is not None:
+            snd_byte_arr = io.BytesIO()
+            with open(jdic.soundf, 'rb') as s:
+                data = s.read()
+                snd_byte_arr = io.BytesIO(data)
+                snd_byte_arr = snd_byte_arr.getvalue()
+                soundf = self.col.media.write_data(jdic.kanji + '.mp3', snd_byte_arr)
+                note.fields[6] = '[sound:'+ soundf + ']'
 
-    return note
+        if jdic.wordtype is WordType.noun:
+            self.col.add_note(note, self.noun_deck['id'])
+        elif jdic.wordtype is WordType.naAdj:
+            self.col.add_note(note, self.naAdj_deck['id'])
+        elif jdic.wordtype is WordType.iAdj:
+            self.col.add_note(note, self.iAdj_deck['id'])
+        elif jdic.wordtype is WordType.dunno:
+            self.col.add_note(note, self.dunno_deck['id'])
 
-# DO THIS YOU DRUNKARD
-# def make_adj_note(jdic: dict) -> Note:
-#     note = col.new_note(kanji_template)
-#     note.fields[0] = jdic['']
-#     note.fields[1] = jdic.kanji
+        return note
 
-#     note.fields[3] = nk.kunyomi
-#     note.fields[4] = nk.onyomi
+    def saveall(self):
+        self.col.autosave()
 
 
-col.autosave()
 
-# print(col.decks.cids(1611363338011))
-# aKan = col.get_card(1634656883987)
-# print(aKan.note().fields[2])
+    # print(col.decks.id_for_name("日本語::語彙::名詞と他"))
+    # print(col.decks.cids(1612191424176))
+    # aKan = col.get_card(1637179150351)
+    # print(aKan.note().fields[6])

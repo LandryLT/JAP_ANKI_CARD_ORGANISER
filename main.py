@@ -1,10 +1,11 @@
 import ssl
-from KanjiSljfaq import KanjiSljfaq
 from WWWJDIC import WWWJDIC, NoHits, NoMoreHits
 from AnkiReader import get_existing_kanji_list
 from NewKanjis import NewKanji, get_new_kanjis
 import os
-
+import DeckModels as mkdeck
+from DeckModels import DeckBuilder
+from anki.storage import Collection
 #///////////////////////////////////////////////////////////////////
 
 # Where main.py is :
@@ -17,6 +18,7 @@ soundfolder = os.path.join(working_dir, ".sounds/")
 newdecksfolder = os.path.join(working_dir, ".new_decks/")
 # Existing Kanji :
 cpath = "C:\\Users\\landr\\AppData\\Roaming\\Anki2\\User 1\\collection.anki2"
+anki_col = Collection(cpath)
 
 # THIS KANJI 龯 IS A NICE EXAMPLE OF BUGGY KANJI
 
@@ -51,13 +53,22 @@ for w in words_to_add:
 
 # Make new Kanji Card
 NewKanjiCards = []
-existing_kanjis = get_existing_kanji_list(cpath)
+existing_kanjis = get_existing_kanji_list(anki_col)
 for k in get_new_kanjis(existing_kanjis, JDIC_words):
     (print("new Kanji: " + k + " !"))
     NewKanjiCards.append(NewKanji(k))
 
-# Make the new deck
+# Import in Anki
+mkdeck = DeckBuilder(anki_col)
+for kjc in NewKanjiCards:
+        mkdeck.make_ankiKanjiNote(kjc)
+for jwrd in JDIC_words:
+    if type(jwrd) is not WWWJDIC:
+        raise
+    for nc in jwrd.clean_definitions:
+        mkdeck.make_ankiAdjNote(nc)
 
+mkdeck.saveall()
 
 # # Print stuff
 # print(word_def.labelID)
