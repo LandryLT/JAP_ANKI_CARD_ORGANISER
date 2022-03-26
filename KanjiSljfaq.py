@@ -2,9 +2,10 @@ from urllib.error import URLError
 import urllib.parse, urllib.request
 from PIL import Image
 import io
-import ssl
 
-ssl._create_default_https_context = ssl._create_unverified_context
+#////////////////////////////////////////////
+# Scraping from kanji.sljfaq for stroke order
+#////////////////////////////////////////////
 
 class KanjiSljfaq:
     def __init__(self, kanji_l: list) -> None:

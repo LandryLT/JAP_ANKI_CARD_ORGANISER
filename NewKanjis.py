@@ -1,11 +1,24 @@
-import imp
 from bs4 import BeautifulSoup
 from KanjiSljfaq import KanjiSljfaq
 import requests
 import urllib.parse
+from anki.storage import Collection
+import re 
 
+#////////////////////////////////////
+# Working on yet to be learned Kanjis
+#////////////////////////////////////
 
+# Make list of kanjis already in the database
+def get_existing_kanji_list(col: Collection):
+    existing_kanji = []
+    for cid in col.find_notes("deck:日本語::文字::漢字"):
+        note = col.get_note(cid)
+        existing_kanji.append( re.sub(r'[^一-龯]', '', note.fields[1]))
 
+    return existing_kanji
+
+# Don't add kanjis that are already in the database
 def get_new_kanjis(old_kanjis: list, newWWWJDICs: list):
     
     # List kanji from new vocab
@@ -20,6 +33,7 @@ def get_new_kanjis(old_kanjis: list, newWWWJDICs: list):
 
     return new_kanjis
 
+# Accessing WWWJDIC Kanji dictionnary and formating for Anki import
 class NewKanji:
     def __init__(self, kanji) -> None:
         self.kanji = kanji
@@ -45,11 +59,13 @@ class NewKanji:
         for s in self.soup.next_siblings:
             if s.string == '[音]':
                 return s.next_sibling.next_sibling.string
+        return ''
 
     def get_kun(self):
         for s in self.soup.next_siblings:
             if s.string == '[訓]':
                 return s.next_sibling.next_sibling.string
+        return ''
 
     def get_english(self):
         english = ''

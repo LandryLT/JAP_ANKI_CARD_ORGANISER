@@ -53,10 +53,9 @@ def kana_to_romaji(text):
 		u'ｓ':'s',u'ｔ':'t',u'ｕ':'u',u'ｖ':'v',u'ｗ':'w',u'ｘ':'x',u'ｙ':'y',u'ｚ':'z',
 	}
 	
-	# Sort key by length descending
-	for key in sorted(dict, lambda x,y: cmp(len(y), len(x))):
+	for key in dict:
 		value=dict[key]
 		p=re.compile(key)
-		text=p.sub( value, text )
-	
+		text = p.sub(value, text)
+
 	return text

@@ -1,7 +1,11 @@
 from enum import Enum
 import re
-from tkinter.messagebox import NO
 
+#///////////////////////////////////////////////
+# Toolset to identify definitions and wordtypes
+#///////////////////////////////////////////////
+
+# Finding word types
 noun_regex = r'(\(((n(|,[^)]+))|aux)\))'
 godan_regex = r'(\(v5.(|,[^)]+)\))'
 ichidan_regex = r'(\(v1.(|,[^)]+)\))'
@@ -16,6 +20,7 @@ wordtypes_regex = {'noun': noun_regex,\
     'iAdj': iAdj_regex,\
     'dunno': dunno_regex}
 
+# Getting the definition with word type
 final_regex = r'(?P<definition>(' +\
     noun_regex + r'|' +\
     godan_regex + r'|' +\
@@ -47,12 +52,14 @@ class WordType(Enum):
     ichidanVerb = 4
     dunno = 5
 
+# Clean up unnecessary data
 class HitResult:
     def __init__(self, hittype: WordType, definition: str, transitivness: str = None) -> None:
         self.type = hittype
         self.transitivness = HitResult.cleanup_transitivness(transitivness)
         self.definition = HitResult.clean_up_definition(definition)
     
+    # From iitt to 他動詞と自動車
     def cleanup_transitivness(transitivness):
         if transitivness is None:
             return None
@@ -63,7 +70,9 @@ class HitResult:
         elif len(re.findall(r't', transitivness)) > 0:
             return '他動詞'
 
+
     def clean_up_definition(definition: str) -> str:
+        # Getting rid of the pesky stuff in parenthesis
         patterns = [
             r'\([\d]+\)',
             r'\(See [^)]+\)',
@@ -74,6 +83,7 @@ class HitResult:
         for p in patterns:
             definition = re.sub(p, '', definition)
         
+        # Cleaning up messy whitespaces
         definition = re.sub(r' +', ' ', definition)
         definition = re.sub(r'^ ', '', definition)
         

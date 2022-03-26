@@ -4,7 +4,11 @@ import requests
 import urllib.parse
 import os.path
 from KanjiSljfaq import KanjiSljfaq
-from NewDef import NewVerb, newAdj
+from NewDef import NewVerb, NewAdj
+
+#////////////////////////
+# Scrapping form WWWJDIC
+#////////////////////////
 
 class WWWJDIC:
     def __init__(self, word: str, sound_download_dir: str, rendered_soup= None, excludedIDs=[]) -> None:
@@ -15,7 +19,7 @@ class WWWJDIC:
         if self.allsoup is None:
             self.allsoup = self.renderWWWJDIC()
         
-        # 
+        # Rough data
         self.bestsoup = self.find_word_definition(excludedIDs)
         self.labelID = self.get_ID()
         self.rough_def = self.get_rough_def()
@@ -85,17 +89,21 @@ class WWWJDIC:
         br = self.bestsoup.find('br')
         # No sentences ...
         if br is None:
-            return(None,None)
+            return ('', '')
 
         # Possible sentences !
         both_l = ''
-        for s in br.next_sibling.contents[2:-2]:
+        for s in br.next_sibling.contents[0:-2]:
             both_l = both_l + str(s)
-        
+
+        # Getting rid of &nbsp and other stuff
+        both_l = both_l.replace(u'\xa0', u'\n')
+        both_l = re.sub(r'(;|\n|\(\d+\))', '', both_l)
+
         # Seperate Japanese and English
         both_l_re = re.match(r'(?P<jap>^.*)(\t)(?P<eng>.*$)', both_l)
         if both_l_re is None:
-            return (None, None)
+            return ('', '')
         
         return (both_l_re.group('jap'), both_l_re.group('eng'))
 
@@ -128,21 +136,21 @@ class WWWJDIC:
         return soundfile_path
 
 
-    # Get kana
     def get_kana(self) -> str:
         kana_url = re.search(r'm\(\'kana=(?P<kana>[^&]+)(\&kanji=.*)?\'\)', self.bestsoup.find('script').text).group('kana')
         kana = urllib.parse.unquote(kana_url)
         if kana == self.word:
-            kana = None
+            kana = ''
         return kana
 
 
     # Get a list of the Kanjis
-    def get_kanjis(self):
+    def get_kanjis(self) -> list:
         output = []
         for r in re.findall(r'[一-龯]', self.word):
             output.append(r)
         return output
+
 
     # Get unique LabelID
     def get_ID(self) -> str:
@@ -209,22 +217,24 @@ class WWWJDIC:
         
         return hits
 
+    # Create Anki-digestable data
     def make_clean_defs(self) -> list:
         clean_defs = []
         for h in self.hits:
-
             if type(h) is not HitResult:
-                raise TypeError
-
+                raise TypeError            
+            
+            # Nouns and adjectives
             if h.type in [ WordType.iAdj, WordType.naAdj, WordType.dunno, WordType.noun ]:
             
-                nDef = newAdj(h.definition, h.type, self.kanjis, self.kana,\
+                nDef = NewAdj(h.definition, h.type, self.word, self.kana,\
                 self.eng_sentence, self.jap_sentence, self.kanji_stroke_orders, self.sound_file)                
             
                 clean_defs.append(nDef)
             
+            # Verbs
             elif h.type in [WordType.godanVerb, WordType.ichidanVerb]:
-                nDef = NewVerb(h.definition, h.type, self.kanjis, self.kana,\
+                nDef = NewVerb(h.definition, h.type, self.word, self.kana,\
                 self.eng_sentence, self.jap_sentence, self.kanji_stroke_orders, self.sound_file, h.transitivness)
 
                 clean_defs.append(nDef)
