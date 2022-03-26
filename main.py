@@ -1,11 +1,10 @@
 import ssl
 from WWWJDIC import WWWJDIC, NoHits, NoMoreHits
-from AnkiReader import get_existing_kanji_list
-from NewKanjis import NewKanji, get_new_kanjis
+from NewKanjis import *
 import os
-import DeckModels as mkdeck
 from DeckModels import DeckBuilder
 from anki.storage import Collection
+from NewDef import *
 #///////////////////////////////////////////////////////////////////
 
 # Where main.py is :
@@ -55,33 +54,31 @@ for w in words_to_add:
 NewKanjiCards = []
 existing_kanjis = get_existing_kanji_list(anki_col)
 for k in get_new_kanjis(existing_kanjis, JDIC_words):
-    (print("new Kanji: " + k + " !"))
+    print("new Kanji: " + k + " !")
     NewKanjiCards.append(NewKanji(k))
 
-# Import in Anki
+
 mkdeck = DeckBuilder(anki_col)
+# Import Kanjis in Anki
 for kjc in NewKanjiCards:
-        mkdeck.make_ankiKanjiNote(kjc)
+    if type(kjc) is not NewKanji:
+        raise TypeError
+
+    print("Importing " + kjc.kanji + " in Anki")
+    mkdeck.make_ankiKanjiNote(kjc)
+
+# Import Vocab in Anki
 for jwrd in JDIC_words:
     if type(jwrd) is not WWWJDIC:
-        raise
-    for nc in jwrd.clean_definitions:
-        mkdeck.make_ankiAdjNote(nc)
+        raise TypeError
 
+    for nc in jwrd.clean_definitions:    
+        if type(nc) is not NewAdj:
+            raise TypeError
+
+        print("Importing " + nc.word + " in Anki")
+        mkdeck.make_ankiNote(nc)
+
+# Save all and finish !
+print("All done :)")
 mkdeck.saveall()
-
-# # Print stuff
-# print(word_def.labelID)
-# for w in JDIC_words:
-#     for h in w.hits:
-#         if w.kana is not None:
-#             print(w.word + " (" + w.kana + ") : " + str(h.type) + ": " + h.definition)
-#         else:
-#             print(w.word + ": " + str(h.type) + ": " + h.definition)
-# # print(word_def.kanjis)
-# print(word_def.word)
-# print(word_def.kana)
-# print(word_def.jap_sentence)
-# print(word_def.eng_sentence)
-# print(word_def.sound_file)
-
