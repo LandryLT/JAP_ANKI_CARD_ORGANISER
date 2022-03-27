@@ -14,13 +14,13 @@ class WWWJDIC:
     def renderWWWJDIC(self):
 
     # Isolates an entire word entry from the html
-    def find_word_definition(self):
+    def find_word_definition(self, excludedIDs):
 
     # Isolate the example sentence and its translation from webpage if any
     def get_sentence(self):
 
     # If there is a soundfile, get it !
-    def get_sound(self):
+    def get_sound(self, dir):
 
     #　Gets all the kana (not as easy)
     def get_kana(self):
@@ -54,17 +54,77 @@ class KanjiSljfaq:
 ## HitResult
 
 All the nasty regex for guessing the wordtypes, transitivenss of verbs and cleaning up the messy definitions are in **HitResult**.
-In this file there are `WordType(enum):`{:.python}
+In this file there is :
+
+- `WordType(enum)` for clean wordtype distinction
+- `NoMoreHits(Exception)` and `NoHits(Exception)` for throwing "*not found on WWWJDIC*" exceptions.
+- a bunch of regular expression to get the corresponding wordtypes
+- an `class HitResult` to tie everything together
 
 ```python
 class HitResult:
+    # Get rid of unnecessary stuff in definitions
     def clean_up_definition(definition)
-
+    
+    # Replace dirty transitivness by 自動詞また他動詞それとも両方
     def cleanup_transitivness(transitivness):
 ```
 
 ## NewKanjis
 
+**NewKanjis** gives methods to make a list of kanjis already in the database (`get_existing_kanji_list`) and to compare it to the list of kanji in the list of new words(`get_new_kanjis`).
+
+```python
+class NewKanji:
+    # Make a beautiful soup out of the Kanji search webpage
+    def renderWWWJDIC(self):
+    
+    # Isolates the onyomi
+    def get_on(self):
+
+    # Isolates the kunyomi
+    def get_kun(self):
+
+    # Isolates the english translation
+    def get_english(self):
+```
+
 ## NewDef
 
+**NewDef** is a file containing two Classes (`NewDef` and `NewVerb(NewDef)`) which are just Anki-digestable form of data.
+
+```python
+class NewDef:
+    # No methods except for init :)
+
+
+class NewVerb(NewDef):
+    # Get a romaji version of the verb stem
+    def get_stem(self):
+
+    # Get a romaji version of the verb te-form
+    def get_te_form(self):
+```
+
 ## DeckModels
+
+**DeckModels** is the module the imports everything into Anki. All deck and template IDs are hardcoded in the main classe's attributes. You might need to find your own with the method :
+
+```python
+from anki.storage import Collection
+
+col = Collection('[...user home path]/AppData/Roaming/Anki2/User 1/collection.anki2')
+col.decks.id_for_name('[deck name]')
+```
+
+```python
+class DeckBuilder:
+    # Adds a kanji note to corresponding deck
+    def make_ankiKanjiNote(self, newKanji):
+
+    # Adds a verb or adjective note to corresponding deck
+    def make_ankiNote(self, newWord):
+    
+    # Import all modifications in Anki
+    def saveall(self):
+```
