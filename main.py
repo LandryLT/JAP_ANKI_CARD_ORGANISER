@@ -72,11 +72,8 @@ for jwrd in JDIC_words:
     if type(jwrd) is not WWWJDIC:
         raise TypeError
 
-    for nc in jwrd.clean_definitions:    
-        if type(nc) is not NewAdj:
-            raise TypeError
-
-        print("Importing " + nc.word + " in Anki")
+    for nc in jwrd.clean_definitions:
+        print("Importing " + nc.word + " (" + str(nc.wordtype).replace("WordType.", "") + ") in Anki")
         mkdeck.make_ankiNote(nc)
 
 # Save all and finish !

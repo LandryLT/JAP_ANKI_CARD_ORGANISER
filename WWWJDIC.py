@@ -61,15 +61,15 @@ class WWWJDIC:
             headword = e.find('label').find('font', size='+1').stripped_strings
             headword_str = ''
             for s in headword:
-                headword_str = headword_str + s           
+                headword_str += s           
             
             # Regex just the kanji part
-            reg_pattern = r'(?P<hdwrd>^.*)(【.*】|《(?P<kanjiopt>.*)》||\(P\))'
+            reg_pattern = r'(?P<hdwrd>^.*)(【.*】|《(?P<kanjiopt>.*)》)?'
             hdwrd = re.match(reg_pattern, headword_str).group('hdwrd')
             extra_kanji = re.match(reg_pattern, headword_str).group('kanjiopt')
             if extra_kanji is not None:
                 hdwrd += '; ' + extra_kanji
-            hits = re.findall(r'[^;\s\(P\)]+', hdwrd)          
+            hits = re.findall(r'[^;\s\(P\)【】《》]+', hdwrd)          
             
             # If matches exactly self.word
             for h in hits:
@@ -112,7 +112,12 @@ class WWWJDIC:
     def get_sound(self, dir: str) -> str:
 
         # Find query string 
-        query_string = re.match(r'm\(\'(?P<qstring>.+)\'\)',self.bestsoup.find('script').text).group('qstring')
+        try:
+            query_string = re.match(r'm\(\'(?P<qstring>.+)\'\)',self.bestsoup.find('script').text).group('qstring')
+        except AttributeError:
+            return None
+        except:
+            raise
         
         # No sound
         if query_string is None:
@@ -137,11 +142,26 @@ class WWWJDIC:
 
 
     def get_kana(self) -> str:
-        kana_url = re.search(r'm\(\'kana=(?P<kana>[^&]+)(\&kanji=.*)?\'\)', self.bestsoup.find('script').text).group('kana')
-        kana = urllib.parse.unquote(kana_url)
-        if kana == self.word:
-            kana = ''
-        return kana
+        try:
+            kana_url = re.search(r'm\(\'kana=(?P<kana>[^&]+)(\&kanji=.*)?\'\)', self.bestsoup.find('script').text).group('kana')
+            kana = urllib.parse.unquote(kana_url)
+            if kana == self.word:
+                kana = ''
+            return kana
+        # Group 'kana' can't be found because no sound
+        except AttributeError:
+            for s in self.bestsoup.find('label').find('font', size='+1').stripped_strings:
+                # No sound so can't find <script> in html :/
+                kana = re.findall(r'(?<=【).*(?=】)', s)
+                if len(kana) == 1:
+                    return kana[0]
+                
+                # Sometimes kanji come in second choice because mostly written in kana
+                s = re.sub(r'[;\s\(P\)【】《》　]', '', s)
+                if re.match(r'[一-龯]', s) is None and re.match(r'[ぁ-んァ-ン]', s) is not None:
+                    return s
+        except:
+            raise
 
 
     # Get a list of the Kanjis

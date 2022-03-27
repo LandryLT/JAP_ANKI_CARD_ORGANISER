@@ -8,7 +8,7 @@ import re
 # Finding word types
 noun_regex = r'(\(((n(|,[^)]+))|aux)\))'
 godan_regex = r'(\(v5.(|,[^)]+)\))'
-ichidan_regex = r'(\(v1.(|,[^)]+)\))'
+ichidan_regex = r'(\(v1.?(|,[^)]+)\))'
 naAdj_regex = r'(\([^\(]*,adj-na\)|\(adj-na(\)|,?[^)]+\)))'
 iAdj_regex = r'(\(adj-i(|,[^)]+)\))'
 dunno_regex = r'(\(dunno\))'
@@ -62,13 +62,15 @@ class HitResult:
     # From iitt to 他動詞と自動車
     def cleanup_transitivness(transitivness):
         if transitivness is None:
-            return None
+            return ''
         if len(re.findall(r'i', transitivness)) > 0 and len(re.findall(r't', transitivness)) > 0:
             return '他動詞と自動車'
         elif len(re.findall(r'i', transitivness)) > 0:
             return '自動車'
         elif len(re.findall(r't', transitivness)) > 0:
             return '他動詞'
+        else:
+            return ''
 
 
     def clean_up_definition(definition: str) -> str:
