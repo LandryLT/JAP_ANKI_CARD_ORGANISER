@@ -54,7 +54,7 @@ class KanjiSljfaq:
 ## HitResult
 
 All the nasty regex for guessing the wordtypes, transitivenss of verbs and cleaning up the messy definitions are in **HitResult**.
-In this file there are ```{.python}WordType(enum):```
+In this file there are `WordType(enum):`{:.python}
 
 ```python
 class HitResult:
