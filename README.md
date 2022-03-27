@@ -64,7 +64,7 @@ In this file there is :
 ```python
 class HitResult:
     # Get rid of unnecessary stuff in definitions
-    def clean_up_definition(definition)
+    def clean_up_definition(definition):
     
     # Replace dirty transitivness by 自動詞また他動詞それとも両方
     def cleanup_transitivness(transitivness):
