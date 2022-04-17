@@ -43,6 +43,7 @@ for w in words_to_add:
     print("WWWJDIC-ing " + w)
     excludedIDs = []
     prerenderedSoup = None
+    # Multipass until NoMoreHits
     while True:
         try:
             newJDIC = WWWJDIC(w, soundfolder, prerenderedSoup, excludedIDs)
