@@ -40,15 +40,21 @@ except FileNotFoundError:
 # WWWJDIC the words to add
 JDIC_words = []
 for w in words_to_add:
-    try:
-        print("WWWJDIC-ing " + w)
-        JDIC_words.append(WWWJDIC(w, soundfolder))
-    except NoHits:
-        raise
-    except NoMoreHits as e:
-        print(e)
-    except FileNotFoundError:
-        raise
+    print("WWWJDIC-ing " + w)
+    excludedIDs = []
+    prerenderedSoup = None
+    while True:
+        try:
+            newJDIC = WWWJDIC(w, soundfolder, prerenderedSoup, excludedIDs)
+            JDIC_words.append(newJDIC)
+            excludedIDs.append(newJDIC.labelID)
+            prerenderedSoup = newJDIC.allsoup
+        except NoMoreHits:
+            break
+        except NoHits:
+            raise
+        except FileNotFoundError:
+            raise
 
 # Make new Kanji Card
 NewKanjiCards = []
@@ -78,4 +84,4 @@ for jwrd in JDIC_words:
 
 # Save all and finish !
 print("All done :)")
-mkdeck.saveall()
+# mkdeck.saveall()
