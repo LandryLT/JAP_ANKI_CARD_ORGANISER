@@ -6,7 +6,7 @@ import re
 #///////////////////////////////////////////////
 
 # Finding word types
-noun_regex = r'(\([^(]*[^a-z]((n(|,[^)]+))|aux)\))'
+noun_regex = r'(\([^a-z\(]*n(|,[^\)]+)\))'
 godan_regex = r'(\(v5.(|,[^)]+)\))'
 ichidan_regex = r'(\(v1.?(|,[^)]+)\))'
 naAdj_regex = r'(\([^(]+,adj-na,[^)]+\)|\([^(]+,adj-na\)|\(adj-na(\)|,?[^)]+\)))'
