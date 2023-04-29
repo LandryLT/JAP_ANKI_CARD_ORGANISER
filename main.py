@@ -2,9 +2,12 @@ import ssl
 from WWWJDIC import WWWJDIC, NoHits, NoMoreHits
 from NewKanjis import *
 import os
+from sys import stdout
 from DeckModels import DeckBuilder
 from anki.storage import Collection
 from NewDef import *
+from secured_pickle import load_secure_pickle, save_secure_pickle, check_key
+
 #///////////////////////////////////////////////////////////////////
 
 # Where main.py is :
@@ -15,6 +18,11 @@ vocabfile = os.path.join(working_dir, "vocab2add.txt")
 soundfolder = os.path.join(working_dir, ".sounds/")
 # Where to write the new decks :
 newdecksfolder = os.path.join(working_dir, ".new_decks/")
+# Where to store secured cache files : 
+cachefolder = os.path.join(working_dir, ".cache")
+word_cache = os.path.join(cachefolder, "wordcache")
+kanji_cache = os.path.join(cachefolder, "kanjicache")
+load_from_cache = False
 # Existing Kanji :
 cpath = "C:\\Users\\landr\\AppData\\Roaming\\Anki2\\User 1\\collection.anki2"
 anki_col = Collection(cpath)
@@ -25,44 +33,80 @@ anki_col = Collection(cpath)
 
 # Create unprotected SSL context /!\
 ssl._create_default_https_context = ssl._create_unverified_context
+check_key(working_dir)
 
-# Import words to add
-words_to_add = []
-try:
-    with open(vocabfile, 'r', encoding='utf-8') as f:
-        for w in f.read().splitlines():
-            # Python style comment out
-            if w[0] != '#':
-                words_to_add.append(w)
-except FileNotFoundError:
-    raise
+if load_from_cache:
+    print("Are you sure you want to load from cache, you might create duplicates unintentionally ? (y|n)")
+    response = input()
+    if (not re.match(r'^y(es)?$', response)):
+        load_from_cache = False
 
-# WWWJDIC the words to add
+
 JDIC_words = []
-for w in words_to_add:
-    print("WWWJDIC-ing " + w)
-    excludedIDs = []
-    prerenderedSoup = None
-    # Multipass until NoMoreHits
-    while True:
-        try:
-            newJDIC = WWWJDIC(w, soundfolder, prerenderedSoup, excludedIDs)
-            JDIC_words.append(newJDIC)
-            excludedIDs.append(newJDIC.labelID)
-            prerenderedSoup = newJDIC.allsoup
-        except NoMoreHits:
-            break
-        except NoHits:
-            raise
-        except FileNotFoundError:
-            raise
+if load_from_cache:
+    #Load from cache
+    JDIC_words = load_secure_pickle(word_cache)
+    #Print loaded
+    print("Loading " + str(len(JDIC_words)) + " WWWJDIC from cache:")
+    for word in JDIC_words[:-1]:
+        for c in word.clean_definitions:        
+            stdout.write(c.word)
+        stdout.write(", ")
+    for c in JDIC_words[-1:][0].kanjis:
+        stdout.write(c)
+    stdout.write("\n\n")
+else:
+    # Import words to add
+    words_to_add = []
+    try:
+        with open(vocabfile, 'r', encoding='utf-8') as f:
+            for w in f.read().splitlines():
+                # Python style comment out
+                if w[0] != '#':
+                    words_to_add.append(w)
+    except FileNotFoundError:
+        raise
 
-# Make new Kanji Card
+    # WWWJDIC the words to add
+    for w in words_to_add:
+        print("WWWJDIC-ing " + w)
+        excludedIDs = []
+        prerenderedSoup = None
+        # Multipass until NoMoreHits
+        while True:
+            try:
+                newJDIC = WWWJDIC(w, soundfolder, prerenderedSoup, excludedIDs)
+                JDIC_words.append(newJDIC)
+                excludedIDs.append(newJDIC.labelID)
+                prerenderedSoup = newJDIC.allsoup
+            except NoMoreHits:
+                break
+            except NoHits:
+                raise
+            except FileNotFoundError:
+                raise
+    save_secure_pickle(JDIC_words, word_cache)
+
 NewKanjiCards = []
-existing_kanjis = get_existing_kanji_list(anki_col)
-for k in get_new_kanjis(existing_kanjis, JDIC_words):
-    print("new Kanji: " + k + " !")
-    NewKanjiCards.append(NewKanji(k))
+if load_from_cache:
+    #Load from cache
+    NewKanjiCards = load_secure_pickle(kanji_cache)
+    #Print loaded
+    print("Loading " + str(len(NewKanjiCards)) + " Kanjis from cache:")
+    for kanji in NewKanjiCards[:-1]:
+        for c in kanji.kanji:        
+            stdout.write(c)
+        stdout.write(", ")
+    for c in NewKanjiCards[-1:][0].kanji:
+        stdout.write(c)
+    stdout.write("\n\n")
+else:
+    # Make new Kanji Card   
+    existing_kanjis = get_existing_kanji_list(anki_col)
+    for k in get_new_kanjis(existing_kanjis, JDIC_words):
+        print("new Kanji: " + k + " !")
+        NewKanjiCards.append(NewKanji(k))
+    save_secure_pickle(NewKanjiCards, kanji_cache)
 
 
 mkdeck = DeckBuilder(anki_col)

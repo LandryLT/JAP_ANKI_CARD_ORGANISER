@@ -69,7 +69,7 @@ class WWWJDIC:
             extra_kanji = re.match(reg_pattern, headword_str).group('kanjiopt')
             if extra_kanji is not None:
                 hdwrd += '; ' + extra_kanji
-            hits = re.findall(r'[^;\s\(P\)【】《》]+', hdwrd)          
+            hits = re.findall(r'[^;\s\(P\)【】《》\[\]]+', hdwrd)          
             
             # If matches exactly self.word
             for h in hits:
@@ -90,6 +90,11 @@ class WWWJDIC:
         # No sentences ...
         if br is None:
             return ('', '')
+
+        # Weird text edgecase... (see 静岡)
+        if br.next_sibling == '\n':
+            br = self.bestsoup.find_all('br')[1]
+
 
         # Possible sentences !
         both_l = ''

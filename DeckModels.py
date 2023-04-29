@@ -76,6 +76,8 @@ class DeckBuilder:
         if len(jdic.stroke_order.img) > 0:
             note.fields[stroke_order_field] += '<div>'
             for i in jdic.stroke_order.img:
+                if i is None:
+                    continue
                 # Writing images in the collection.media default location
                 img_byte_arr = io.BytesIO()
                 i.save(img_byte_arr, format='PNG')

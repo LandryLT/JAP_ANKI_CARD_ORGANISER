@@ -128,3 +128,18 @@ class DeckBuilder:
     # Import all modifications in Anki
     def saveall(self):
 ```
+
+## Secured Pickles
+
+**Secured Pickles** is more for debugging. You can save Python objects in a signed file. It contains exception such as `InvalidSignature(Exception)` if cache files have an invalid signatures and `UserKeyNotFound(Exception)` if .secret_key file is missing. To create a secret_key file use the `check_key` method.
+
+```python
+# Save a pickled file with hmac signature
+def save_secure_pickle (obj, filepath):
+
+# Load a pickled file with hmac signature
+def load_secure_pickle (filepath):
+
+# Check for key in folder, create one if missing
+def check_key(working_dir):
+```
