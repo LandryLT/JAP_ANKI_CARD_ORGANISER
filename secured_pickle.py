@@ -22,7 +22,7 @@ class UserKeyNotFound(Exception):
         super().__init__(self.message) 
 
 # Check for key in folder, create one if missing
-def check_key(working_dir):
+def check_key(working_dir: str):
     if not path.isfile(path.join(working_dir, ".secret_key")):
         print("No secret key found, creating a new one")
         chars = string.ascii_letters.join(string.punctuation).join(string.digits)
@@ -36,13 +36,13 @@ def check_key(working_dir):
             key_file.write(new_key)
 
 # Quick read file simplification
-def read_file_data (filepath, flag= 'rb'):
+def read_file_data (filepath:str, flag= 'rb'):
     with open(filepath, flag) as f:
         return f.read()
 
 
 # Save a pickled file with hmac signature
-def save_secure_pickle (obj, filepath):
+def save_secure_pickle (obj, filepath:str):
     # Max Lim 1000 WWWJDIC words
     sys.setrecursionlimit(700000)
     data = pickle.dumps(obj)
@@ -60,7 +60,7 @@ def save_secure_pickle (obj, filepath):
     sys.setrecursionlimit(1000)
 
 # Load a pickled file with hmac signature
-def load_secure_pickle (filepath):
+def load_secure_pickle (filepath:str):
     data = read_file_data(filepath)
     digest, pickle_data = data.split('<keydataseparator>'.encode('utf-8'))
     #Get key from your own personnal .secret_key
