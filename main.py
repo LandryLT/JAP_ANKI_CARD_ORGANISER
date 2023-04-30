@@ -1,6 +1,7 @@
 import ssl
 from WWWJDIC import WWWJDIC, NoHits, NoMoreHits
 from NewKanjis import *
+from writelogs import noHitsWriteLog
 import os
 from sys import stdout
 from DeckModels import DeckBuilder
@@ -14,6 +15,9 @@ from secured_pickle import load_secure_pickle, save_secure_pickle, check_key
 working_dir = os.path.dirname(os.path.realpath(__file__))
 # The list of vocab to add :
 vocabfile = os.path.join(working_dir, "vocab2add.txt")
+# Where to write logs
+logfolder = os.path.join(working_dir, ".logs")
+nohit_logfile = os.path.join(logfolder, "WWWJDIC_notfound.log")
 # Where to write the sound files :
 soundfolder = os.path.join(working_dir, ".sounds/")
 # Where to write the new decks :
@@ -22,7 +26,7 @@ newdecksfolder = os.path.join(working_dir, ".new_decks/")
 cachefolder = os.path.join(working_dir, ".cache")
 word_cache = os.path.join(cachefolder, "wordcache")
 kanji_cache = os.path.join(cachefolder, "kanjicache")
-load_from_cache = False
+load_from_cache = True
 # Existing Kanji :
 cpath = "C:\\Users\\landr\\AppData\\Roaming\\Anki2\\User 1\\collection.anki2"
 anki_col = Collection(cpath)
@@ -33,12 +37,15 @@ anki_col = Collection(cpath)
 
 # Create unprotected SSL context /!\
 ssl._create_default_https_context = ssl._create_unverified_context
+
+# Check if secret key exists for secure cache
 check_key(working_dir)
 
+# Load from cache prompt (because cache loading is more of a debugging tool)
 if load_from_cache:
-    print("Are you sure you want to load from cache, you might create duplicates unintentionally ? (y|n)")
+    print("Are you sure you want to load from cache, you might create duplicate cards unintentionally ? (y|n)")
     response = input()
-    if (not re.match(r'^y(es)?$', response)):
+    if (not re.match(r'^y(es)?$', response, re.IGNORECASE)):
         load_from_cache = False
 
 
@@ -82,7 +89,8 @@ else:
             except NoMoreHits:
                 break
             except NoHits:
-                raise
+                noHitsWriteLog(nohit_logfile, w)
+                break
             except FileNotFoundError:
                 raise
     save_secure_pickle(JDIC_words, word_cache)
