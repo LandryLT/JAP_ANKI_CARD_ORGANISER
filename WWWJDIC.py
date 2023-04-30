@@ -86,31 +86,32 @@ class WWWJDIC:
     # Get example sentence and translation
     def get_sentence(self) -> tuple:  
         
-        br = self.bestsoup.find('br')
-        # No sentences ...
-        if br is None:
-            return ('', '')
+        br_list = self.bestsoup.find_all('br')
+        for br in br_list:
+            # No sentences ...
+            if br is None:
+                continue
 
-        # Weird text edgecase... (see 静岡)
-        if br.next_sibling == '\n':
-            br = self.bestsoup.find_all('br')[1]
+            # Weird text edgecase... (see 静岡)
+            if br.next_sibling == '\n':
+                continue
 
+            # Possible sentences !
+            both_l = ''
+            for s in br.next_sibling.contents[0:-2]:
+                both_l = both_l + str(s)
 
-        # Possible sentences !
-        both_l = ''
-        for s in br.next_sibling.contents[0:-2]:
-            both_l = both_l + str(s)
+            # Getting rid of &nbsp and other stuff
+            both_l = both_l.replace(u'\xa0', u'\n')
+            both_l = re.sub(r'(;|\n|\(\d+\))', '', both_l)
 
-        # Getting rid of &nbsp and other stuff
-        both_l = both_l.replace(u'\xa0', u'\n')
-        both_l = re.sub(r'(;|\n|\(\d+\))', '', both_l)
-
-        # Seperate Japanese and English
-        both_l_re = re.match(r'(?P<jap>^.*)(\t)(?P<eng>.*$)', both_l)
-        if both_l_re is None:
-            return ('', '')
-        
-        return (both_l_re.group('jap'), both_l_re.group('eng'))
+            # Seperate Japanese and English
+            both_l_re = re.match(r'(?P<jap>^.*)(\t)(?P<eng>.*$)', both_l)
+            if both_l_re is None:
+                continue
+            
+            return (both_l_re.group('jap'), both_l_re.group('eng'))
+        return ('', '')
 
 
     # Download sound if any
