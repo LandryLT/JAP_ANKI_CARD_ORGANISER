@@ -16,14 +16,14 @@ working_dir = os.path.dirname(os.path.realpath(__file__))
 # The list of vocab to add :
 vocabfile = os.path.join(working_dir, "vocab2add.txt")
 # Where to write logs
-logfolder = os.path.join(working_dir, ".logs")
+logfolder = os.path.join(working_dir, "logs")
 nohit_logfile = os.path.join(logfolder, "WWWJDIC_notfound.log")
 # Where to write the sound files :
-soundfolder = os.path.join(working_dir, ".sounds/")
+soundfolder = os.path.join(working_dir, "sounds/")
 # Where to write the new decks :
-newdecksfolder = os.path.join(working_dir, ".new_decks/")
+newdecksfolder = os.path.join(working_dir, "new_decks/")
 # Where to store secured cache files : 
-cachefolder = os.path.join(working_dir, ".cache")
+cachefolder = os.path.join(working_dir, "cache")
 word_cache = os.path.join(cachefolder, "wordcache")
 kanji_cache = os.path.join(cachefolder, "kanjicache")
 load_from_cache = True
