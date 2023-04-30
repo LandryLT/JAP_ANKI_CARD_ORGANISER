@@ -104,6 +104,7 @@ class WWWJDIC:
             # Getting rid of &nbsp and other stuff
             both_l = both_l.replace(u'\xa0', u'\n')
             both_l = re.sub(r'(;|\n|\(\d+\))', '', both_l)
+            
 
             # Seperate Japanese and English
             both_l_re = re.match(r'(?P<jap>^.*)(\t)(?P<eng>.*$)', both_l)
@@ -185,12 +186,12 @@ class WWWJDIC:
     def get_rough_def(self) -> str:
         # Sometimes <a> muck it up (stops to first sibling)
         bestsoup_def = self.bestsoup.find('label').find('font').next_sibling
-        bestsou_def_str = ''
+        bestsoup_def_str = ''
         while bestsoup_def is not None:
-            bestsou_def_str += str(bestsoup_def.string)
+            bestsoup_def_str += str(bestsoup_def.string)
             bestsoup_def = bestsoup_def.next_sibling
         
-        return bestsou_def_str
+        return bestsoup_def_str
 
 
     # Gets definitions and corresponding wordtypes (Hits)

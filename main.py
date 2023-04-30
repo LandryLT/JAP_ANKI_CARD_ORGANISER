@@ -26,9 +26,9 @@ newdecksfolder = os.path.join(working_dir, "new_decks/")
 cachefolder = os.path.join(working_dir, "cache")
 word_cache = os.path.join(cachefolder, "wordcache")
 kanji_cache = os.path.join(cachefolder, "kanjicache")
-load_from_cache = True
+load_from_cache = False
 # Existing Kanji :
-cpath = "C:\\Users\\landr\\AppData\\Roaming\\Anki2\\User 1\\collection.anki2"
+cpath = "C:\\Users\\landr\\AppData\\Roaming\\Anki2\\TEST\\collection.anki2"
 anki_col = Collection(cpath)
 
 # THIS KANJI 龯 IS A NICE EXAMPLE OF BUGGY KANJI

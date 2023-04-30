@@ -81,6 +81,7 @@ class HitResult:
             r'\(uk\)',
             r'\(P\)',
             r'\(abbr\)'
+            r'\[P\]'
         ]
         for p in patterns:
             definition = re.sub(p, '', definition)
