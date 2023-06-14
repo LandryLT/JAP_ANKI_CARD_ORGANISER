@@ -6,7 +6,7 @@ import re
 #///////////////////////////////////////////////
 
 # Finding word types
-noun_regex = r'(\([^a-z\(]*n(|,[^\)]+)\))'
+noun_regex = r'(\(([^a-z\(]*n(|,[^\)]+)|adv)\))'
 godan_regex = r'(\(v5.(|,[^)]+)\))'
 ichidan_regex = r'(\(v1.?(|,[^)]+)\))'
 naAdj_regex = r'(\([^(]+,adj-na,[^)]+\)|\([^(]+,adj-na\)|\(adj-na(\)|,?[^)]+\)))'
@@ -76,18 +76,27 @@ class HitResult:
     def clean_up_definition(definition: str) -> str:
         # Getting rid of the pesky stuff in parenthesis
         patterns = [
-            r'\([\d]+\)',
             r'\(See [^)]+\)',
             r'\(uk\)',
             r'\(P\)',
-            r'\(abbr\)'
-            r'\[P\]'
+            r'\(abbr\)',
+            r'\[P\]',
+            r'\(pn\)'
         ]
         for p in patterns:
             definition = re.sub(p, '', definition)
+
+        definition_ind = re.search(r'\([\d]+\)', definition)
+        if definition_ind:
+            definition_ind = definition[definition_ind.span()[0] + 1  : definition_ind.span()[1] - 1]
+            definition = re.sub(re.compile("\(" + definition_ind + "\)"), '- ', definition)
+            definition = re.sub(r'\([\d]+\)', '\n- ', definition)
         
         # Cleaning up messy whitespaces
         definition = re.sub(r' +', ' ', definition)
         definition = re.sub(r'^ ', '', definition)
+
+        print("_________________________________")
+        print(definition)
         
         return definition
