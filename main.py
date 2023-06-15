@@ -1,53 +1,4 @@
-import ssl
-from WWWJDIC import WWWJDIC, NoHits, NoMoreHits
-from NewKanjis import *
-from writelogs import noHitsWriteLog
-import os
-from sys import stdout
-from DeckModels import DeckBuilder
-from anki.storage import Collection
-from NewDef import *
-from secured_pickle import load_secure_pickle, save_secure_pickle, check_key
-
-#///////////////////////////////////////////////////////////////////
-
-# Where main.py is :
-working_dir = os.path.dirname(os.path.realpath(__file__))
-# The list of vocab to add :
-vocabfile = os.path.join(working_dir, "vocab2add.txt")
-# Where to write logs
-logfolder = os.path.join(working_dir, "logs")
-nohit_logfile = os.path.join(logfolder, "WWWJDIC_notfound.log")
-# Where to write the sound files :
-soundfolder = os.path.join(working_dir, "sounds/")
-# Where to write the new decks :
-newdecksfolder = os.path.join(working_dir, "new_decks/")
-# Where to store secured cache files : 
-cachefolder = os.path.join(working_dir, "cache")
-word_cache = os.path.join(cachefolder, "wordcache")
-kanji_cache = os.path.join(cachefolder, "kanjicache")
-load_from_cache = False
-# Existing Kanji :
-cpath = "C:\\Users\\landr\\AppData\\Roaming\\Anki2\\MAIN\\collection.anki2"
-anki_col = Collection(cpath)
-
-# THIS KANJI 龯 IS A NICE EXAMPLE OF BUGGY KANJI
-
-#///////////////////////////////////////////////////////////////////
-
-# Create unprotected SSL context /!\
-ssl._create_default_https_context = ssl._create_unverified_context
-
-# Check if secret key exists for secure cache
-check_key(working_dir)
-
-# Load from cache prompt (because cache loading is more of a debugging tool)
-if load_from_cache:
-    print("Are you sure you want to load from cache, you might create duplicate cards unintentionally ? (y|n)")
-    response = input()
-    if (not re.match(r'^y(es)?$', response, re.IGNORECASE)):
-        load_from_cache = False
-
+from JAP_ANKI_CARD_ORGANISER_const import *
 
 JDIC_words = []
 if load_from_cache:
@@ -89,7 +40,7 @@ else:
             except NoMoreHits:
                 break
             except NoHits:
-                noHitsWriteLog(nohit_logfile, w)
+                noHitsWriteLog(logfile, w)
                 break
             except FileNotFoundError:
                 raise
@@ -137,4 +88,4 @@ for jwrd in JDIC_words:
 
 # Save all and finish !
 print("All done :)")
-mkdeck.saveall()
+#mkdeck.saveall()

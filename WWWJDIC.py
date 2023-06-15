@@ -1,9 +1,9 @@
 from HitResult import *
-from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup, NavigableString
 import requests
 import urllib.parse
 import os.path
-from KanjiSljfaq import KanjiSljfaq
+from KanjiSljfaq import *
 from NewDef import NewVerb, NewAdj
 
 #////////////////////////
@@ -27,7 +27,10 @@ class WWWJDIC:
         # Interesting data
         self.hits = self.get_hits()
         self.kanjis = self.get_kanjis()
-        self.kanji_stroke_orders = KanjiSljfaq(self.kanjis)
+        try:
+            self.kanji_stroke_orders = KanjiSljfaq(self.kanjis)
+        except:
+            raise
         self.kana = self.get_kana()
         self.jap_sentence, self.eng_sentence = self.get_sentence()
         self.sound_file = self.get_sound(sound_download_dir)
@@ -89,7 +92,7 @@ class WWWJDIC:
         br_list = self.bestsoup.find_all('br')
         for br in br_list:
             # No sentences ...
-            if br is None:
+            if br is None or type(br.next_sibling) == NavigableString:
                 continue
 
             # Weird text edgecase... (see 静岡)
@@ -98,6 +101,7 @@ class WWWJDIC:
 
             # Possible sentences !
             both_l = ''
+
             for s in br.next_sibling.contents[0:-2]:
                 both_l = both_l + str(s)
 

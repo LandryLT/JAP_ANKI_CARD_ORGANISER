@@ -96,7 +96,4 @@ class HitResult:
         definition = re.sub(r' +', ' ', definition)
         definition = re.sub(r'^ ', '', definition)
 
-        print("_________________________________")
-        print(definition)
-        
         return definition

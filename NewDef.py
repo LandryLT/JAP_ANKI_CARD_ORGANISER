@@ -11,7 +11,7 @@ class NewAdj:
     en_sentence: str, ja_sentence: str, stroke_order: Image, sound_file: str) -> None:        
         self.definition = definition
         self.wordtype = wordtype
-        self.word = word       
+        self.word = word
         self.kana = kana
         self.en_sentence = en_sentence
         self.ja_sentence = ja_sentence
@@ -30,35 +30,46 @@ class NewVerb(NewAdj):
 
     # Make nice Formating with kana to romaji
     def get_stem(self):
-        stem_kana = self.kana[0:-1]
+        replacement_kana = ""
+        if len(self.kana) > 0:
+            replacement_kana = self.kana
+        else:
+            replacement_kana = self.word
+        stem_kana = replacement_kana[0:-1]
+
         romaji = kana_to_romaji(stem_kana)
         if self.wordtype is WordType.ichidanVerb:
             stem_romaji = romaji + '-'
         elif self.wordtype is WordType.godanVerb:
-            if self.kana[-1] == 'す':
+            if replacement_kana[-1] == 'す':
                 stem_romaji = romaji + 's-, ' + romaji + 'sh-'                
             else:
-                stem_romaji = kana_to_romaji(self.kana)[0:-1] + '-'
+                stem_romaji = kana_to_romaji(replacement_kana)[0:-1] + '-'
         else:
             raise TypeError
         
         return stem_romaji        
     
     def get_te_form(self):
-        stem_kana = self.kana[0:-1]
+        replacement_kana = ""
+        if len(self.kana) > 0:
+            replacement_kana = self.kana
+        else:
+            replacement_kana = self.word
+        stem_kana = replacement_kana[0:-1]
         romaji = kana_to_romaji(stem_kana)
         if self.wordtype is WordType.ichidanVerb:
             te_form = romaji + 'te'
         elif self.wordtype is WordType.godanVerb:
-            if self.kana[-1] in ['う', 'つ', 'る']:
+            if replacement_kana[-1] in ['う', 'つ', 'る']:
                 te_form = romaji + 'tte'
-            elif self.kana[-1] in ['ぬ', 'む', 'ぶ']:
+            elif replacement_kana[-1] in ['ぬ', 'む', 'ぶ']:
                 te_form = romaji + 'nde'
-            elif self.kana[-1] == 'く':
+            elif replacement_kana[-1] == 'く':
                 te_form = romaji + 'ite'
-            elif self.kana[-1] == 'ぐ':
+            elif replacement_kana[-1] == 'ぐ':
                 te_form = romaji + 'ide'
-            elif self.kana[-1] == 'す':
+            elif replacement_kana[-1] == 'す':
                 te_form = romaji + 'shite'
         else:
             raise TypeError
