@@ -29,7 +29,7 @@ cachefolder = os.path.join(working_dir, "cache")
 word_cache = os.path.join(cachefolder, "wordcache")
 kanji_cache = os.path.join(cachefolder, "kanjicache")
 update_word_cache = os.path.join(cachefolder, "updwordcache")
-load_from_cache = True
+load_from_cache = False
 
 
 # THIS KANJI 龯 IS A NICE EXAMPLE OF BUGGY KANJI
