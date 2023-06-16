@@ -87,10 +87,13 @@ class HitResult:
             definition = re.sub(p, '', definition)
 
         definition_ind = re.search(r'\([\d]+\)', definition)
-        if definition_ind:
+        numOfSubdefs = len(re.findall(r'\([\d]+\)', definition))
+        if numOfSubdefs > 1:
             definition_ind = definition[definition_ind.span()[0] + 1  : definition_ind.span()[1] - 1]
             definition = re.sub(re.compile("\(" + definition_ind + "\)"), '- ', definition)
-            definition = re.sub(r'\([\d]+\)', '\n- ', definition)
+            definition = re.sub(r'\([\d]+\)', '\n</br>- ', definition)
+        elif definition_ind:
+            definition = re.sub(r'\([\d]+\)', '', definition)
         
         # Cleaning up messy whitespaces
         definition = re.sub(r' +', ' ', definition)

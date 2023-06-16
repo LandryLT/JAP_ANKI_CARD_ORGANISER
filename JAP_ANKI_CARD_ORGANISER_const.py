@@ -1,5 +1,5 @@
 import ssl
-from WWWJDIC import WWWJDIC, NoHits, NoMoreHits
+from WWWJDIC import WWWJDIC, NoHits, NoMoreHits, EmptySoup
 from NewKanjis import *
 from KanjiSljfaq import KanjiSljfaqNoResponse
 from writelogs import *
@@ -28,7 +28,7 @@ newdecksfolder = os.path.join(working_dir, "new_decks/")
 cachefolder = os.path.join(working_dir, "cache")
 word_cache = os.path.join(cachefolder, "wordcache")
 kanji_cache = os.path.join(cachefolder, "kanjicache")
-rev_word_cache = os.path.join(cachefolder, "revwordcache")
+update_word_cache = os.path.join(cachefolder, "updwordcache")
 load_from_cache = True
 
 

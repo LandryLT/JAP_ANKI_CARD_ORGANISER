@@ -49,7 +49,10 @@ class WWWJDIC:
     # Get best guess of dict entry
     def find_word_definition(self, excludedIDs) -> BeautifulSoup:
         # Get dic entries
-        allheadwords_soup = self.allsoup.find("form", id="inp").find_all("div", style="clear: both;")
+        allheadwords_container_soup = self.allsoup.find("form", id="inp")
+        if allheadwords_container_soup == None:
+            raise EmptySoup(self.word)
+        allheadwords_soup = allheadwords_container_soup.find_all("div", style="clear: both;")
 
         # Strip headwords
         for e in allheadwords_soup:
@@ -272,3 +275,7 @@ class WWWJDIC:
 
         return clean_defs
 
+class EmptySoup(Exception):
+    def __init__(self, word) -> None:
+        self.message = "Soup for " + word + " was empty :'("
+        super().__init__(self.message)

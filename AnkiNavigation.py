@@ -2,7 +2,7 @@ from anki.storage import Collection
 from enum import Enum
 import re
 # Existing Kanji :
-cpath = "C:\\Users\\landr\\AppData\\Roaming\\Anki2\\TEST\\collection.anki2"
+cpath = "C:\\Users\\landr\\AppData\\Roaming\\Anki2\\MAIN\\collection.anki2"
 anki_col = Collection(cpath)
 
 class SearchModelType(Enum):
