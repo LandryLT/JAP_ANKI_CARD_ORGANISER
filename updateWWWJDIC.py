@@ -11,14 +11,17 @@ class SearchModelType(Enum):
     JLPT_temp = "MonoField"
     duolinguo_temp = "Duolinguo tips"
 
-def findCardByDeckModel(deck_model):
+def findCardByDeckModel(deck_model, word=""):
     try:
         if type(deck_model) not in (tuple, list):
             if type(deck_model) is not SearchModelType:
                 raise TypeError
-            return list(anki_col.find_notes('"note:'+ deck_model.value +'"'))
+            if word != "":
+                word = " JapDicFormKanji:_*"+ word + "*"
+            return list(anki_col.find_notes('"note:'+ deck_model.value +'"' + word))
     except TypeError:
         raise
+
 
 def getDeckType(deck_name):
     if re.search("名詞と他", deck_name) or re.search("オノマトピア", deck_name):
@@ -32,10 +35,32 @@ def getDeckType(deck_name):
     if re.search("一段動詞", deck_name):
         return WordType.ichidanVerb
 
-all_adj_temp = findCardByDeckModel(SearchModelType.adj_temp)
-all_verb_temp = findCardByDeckModel(SearchModelType.verb_temp)
-all_kanji_temp = findCardByDeckModel(SearchModelType.kanji_temp)
-all_words = all_adj_temp + all_verb_temp
+# Import words to add
+words_to_update = []
+try:
+    with open(updatevocabfile, 'r', encoding='utf-8') as f:
+        for w in f.read().splitlines():
+            # Python style comment out
+            if w[0] != '#':
+                words_to_update.append(w)
+except FileNotFoundError:
+    raise
+
+all_words = []
+if len(words_to_update) == 0:
+    print("No words in words2update.txt: Update wholde database ? (y|n)")
+    response = input()
+    if (not re.match(r'^y(es)?$', response, re.IGNORECASE)):
+        print("aborting...goodbye !")
+        quit()
+    all_adj_temp = findCardByDeckModel(SearchModelType.adj_temp)
+    all_verb_temp = findCardByDeckModel(SearchModelType.verb_temp)
+    all_words = all_adj_temp + all_verb_temp
+else :
+    for w in words_to_update:
+        all_adj_temp = findCardByDeckModel(SearchModelType.adj_temp, w)
+        all_verb_temp = findCardByDeckModel(SearchModelType.verb_temp, w)
+        all_words += all_adj_temp + all_verb_temp
 
 update_JDIC_words =[]
 totalWords = len(all_words)

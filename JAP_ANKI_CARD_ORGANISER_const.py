@@ -19,6 +19,7 @@ anki_col = Collection(cpath)
 working_dir = os.path.dirname(os.path.realpath(__file__))
 # The list of vocab to add :
 vocabfile = os.path.join(working_dir, "vocab2add.txt")
+updatevocabfile = os.path.join(working_dir, "vocab2update.txt")
 # Where to write logs
 logfolder = os.path.join(working_dir, "logs")
 logfile = os.path.join(logfolder, "errors.log")
@@ -54,6 +55,8 @@ if load_from_cache:
     response = input()
     if (not re.match(r'^y(es)?$', response, re.IGNORECASE)):
         load_from_cache = False
+else:
+    print("No caching")
 
 # Are you sure to save in databasa
 if saveall:
@@ -63,4 +66,6 @@ if saveall:
     response = input()
     if (not re.match(r'^y(es)?$', response, re.IGNORECASE)):
         saveall = False
+else:
+    print("No saving in databas")
 
