@@ -1,8 +1,24 @@
 from difflib import SequenceMatcher
-from AnkiNavigation import *
 from JAP_ANKI_CARD_ORGANISER_const import *
 from HitResult import *
 from time import time, sleep
+
+class SearchModelType(Enum):
+    adj_temp = "Jap. Adjectives Template"
+    verb_temp = "Jap. Verbs Template"
+    verb_conj_temp = "Japanese Verb Conjugation"
+    kanji_temp = "Kanji Card"
+    JLPT_temp = "MonoField"
+    duolinguo_temp = "Duolinguo tips"
+
+def findCardByDeckModel(deck_model):
+    try:
+        if type(deck_model) not in (tuple, list):
+            if type(deck_model) is not SearchModelType:
+                raise TypeError
+            return list(anki_col.find_notes('"note:'+ deck_model.value +'"'))
+    except TypeError:
+        raise
 
 def getDeckType(deck_name):
     if re.search("名詞と他", deck_name) or re.search("オノマトピア", deck_name):
@@ -102,7 +118,8 @@ for note_id in all_words:
         twentyLastTimes = twentyLastTimes[:-20]
     twentyLastTimes.sort()
     estimatedRemainingTime = (twentyLastTimes[int((len(twentyLastTimes)-1)/2)])*(totalWords - ind)
-anki_col.autosave()
+if saveall:
+    anki_col.autosave()
     
 
     

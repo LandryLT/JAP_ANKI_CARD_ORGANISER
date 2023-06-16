@@ -81,11 +81,22 @@ class HitResult:
             r'\(P\)',
             r'\(abbr\)',
             r'\[P\]',
-            r'\(pn\)'
+            r'\(pn\)', 
         ]
+
+        # erase unwanted patterns
         for p in patterns:
             definition = re.sub(p, '', definition)
 
+        # make number of definition first in line
+        preceedind_parenthesis = re.finditer(r'(\([^\)]+\) )+(\([\d]+\) )', definition)
+        for matches in preceedind_parenthesis:
+            substr = definition[matches.span()[0]: matches.span()[1]]
+            numspan = re.search(r'\([\d]+\)', substr).span()
+            substr = substr[numspan[0]:] + substr[:numspan[0]]
+            definition = definition[:matches.span()[0]] + substr + definition[matches.span()[1]:]
+
+        # replace number of definition by a new line "- " 
         definition_ind = re.search(r'\([\d]+\)', definition)
         numOfSubdefs = len(re.findall(r'\([\d]+\)', definition))
         if numOfSubdefs > 1:

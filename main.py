@@ -88,4 +88,5 @@ for jwrd in JDIC_words:
 
 # Save all and finish !
 print("All done :)")
-#mkdeck.saveall()
+if saveall:
+    mkdeck.saveall()
