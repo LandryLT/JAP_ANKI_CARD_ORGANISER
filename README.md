@@ -8,6 +8,8 @@
 
 **WWWJDIC** is where all the heavy scrapping occures. It gets most of its data from the brilliant [Jim Breen's WWWJDIC](https://www.edrdg.org/cgi-bin/wwwjdic/wwwjdic?1C).
 
+- `EmptySoup(Exception)` is raised if the website returns an empty html. This happens because I think they think this script is DDOSing them. If the problem is persistent, change IP one way or another (switching to mobile data for example)
+
 ```python
 class WWWJDIC:
     # Make a beautiful soup out of the webpage
@@ -143,3 +145,7 @@ def load_secure_pickle (filepath):
 # Check for key in folder, create one if missing
 def check_key(working_dir):
 ```
+
+## update WWWJDIC
+
+**update WWWJDIC** is a script to run in case of reformatting Anki cards, it is long and tedious and still needs a manual check once it's finished.
