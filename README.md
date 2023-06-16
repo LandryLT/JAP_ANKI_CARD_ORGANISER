@@ -8,7 +8,7 @@
 
 **WWWJDIC** is where all the heavy scrapping occures. It gets most of its data from the brilliant [Jim Breen's WWWJDIC](https://www.edrdg.org/cgi-bin/wwwjdic/wwwjdic?1C).
 
-- `EmptySoup(Exception)` is raised if the website returns an empty html. This happens because I think they think this script is DDOSing them. If the problem is persistent, change IP one way or another (switching to mobile data for example)
+- `EmptySoup(Exception)` is raised if the website serves empty html. This happens because I think they think this script is DDOSing them. If the problem is persistent, change IP one way or another (switching to mobile data for example)
 
 ```python
 class WWWJDIC:
