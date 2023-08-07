@@ -149,3 +149,9 @@ def check_key(working_dir):
 ## update WWWJDIC
 
 **update WWWJDIC** is a script to run in case of reformatting Anki cards, it is long and tedious and still needs a manual check once it's finished.
+
+
+
+## get random leech
+
+**get random leech** is a script to pick a given number of random leech in the JLPT grammar deck, and output the answer (for studying purposes).
