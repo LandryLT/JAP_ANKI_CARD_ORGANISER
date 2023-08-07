@@ -68,4 +68,3 @@ if saveall:
         saveall = False
 else:
     print("No saving in databas")
-
