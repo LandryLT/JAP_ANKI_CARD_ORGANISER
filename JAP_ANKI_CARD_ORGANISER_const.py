@@ -34,8 +34,8 @@ kanji_cache = os.path.join(cachefolder, "kanjicache")
 update_word_cache = os.path.join(cachefolder, "updwordcache")
 
 # Debug and optimisation options
-load_from_cache = False
-saveall = False
+load_from_cache = True
+saveall = True
 
 
 # THIS KANJI 龯 IS A NICE EXAMPLE OF BUGGY KANJI
@@ -67,4 +67,4 @@ if saveall:
     if (not re.match(r'^y(es)?$', response, re.IGNORECASE)):
         saveall = False
 else:
-    print("No saving in databas")
+    print("No saving in database")
