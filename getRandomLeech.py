@@ -21,7 +21,7 @@ for i in range(0, iterations):
     rand_i = randint(0, len(all_JLPT_leeches) - 1)
     while rand_i in rand_ints:
         rand_i = randint(0, len(all_JLPT_leeches) - 1)
-
+    rand_ints.append(rand_i)
     rand_card = anki_col.get_card(all_JLPT_leeches[rand_i])
     img_file_name = anki_col.media.dir() + "\\" + re.findall(r'img src\=\"(\d+\.png)\"', rand_card.answer())[0]
     rand_imgs.append(img_file_name)
