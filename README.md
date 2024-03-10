@@ -3,24 +3,28 @@
 **Jap Anki Card Organiser** is a Python script that helps you create Anki cards effeciently.
 These scripts are tested and used on my personnal Anki deck and templates. As noted in the **DeckModels** section of this README, you might need to adapt some of the code if you want the scripts to work on your own deck. For reference here are the relevant templates and deck tree that I use :
 
-### Templates :
+### Templates *[Fields]*:
 
 **Kanji Card** *[Meaning, Kanji, Stroke Order, KunYomi, OnYomi]*
+
 **Jap. Ajectives Templates** *[English Translation, JapDicFormKanji, JapDicFormHiragana, EampleSentence, ExampleEnglishTranslation, StrokeOrder, Audio]*
+
 **Jap. Verbs Templates** *[English Translation, JapDicFormKanji, JapDicFormHiragana, ExampleSentence, ExampleSentenceTranslation, Transitivness, Stem, TeForm, StrokeOrder, Audio]*
 
-### Deck Tree : 
-├── Staging
-   ├── dunno
-   ├── イ形容詞
-   ├── ナ形容詞
-   ├── 一段動詞
-   ├── 五段動詞
-   ├── 名詞と他
-   ├── 漢字
+
+### Staging Deck Tree : 
+├── Staging\
+&ensp;&ensp;&ensp;&ensp;├── dunno\
+&ensp;&ensp;&ensp;&ensp;├── イ形容詞\
+&ensp;&ensp;&ensp;&ensp;├── ナ形容詞\
+&ensp;&ensp;&ensp;&ensp;├── 一段動詞\
+&ensp;&ensp;&ensp;&ensp;├── 五段動詞\
+&ensp;&ensp;&ensp;&ensp;├── 名詞と他\
+&ensp;&ensp;&ensp;&ensp;├── 漢字
+
 
 Note also that this repo has other scripts to update my deck and reorganise, which will certainly not work if the deck isn't exactly structured as my personnal one. You can reverse engineer if you feel like it, but I ain't doing to much documentation for something so personnal (cf: *updateWWWJDIC.py*)
----
+
 
 ## WWWJDIC
 
