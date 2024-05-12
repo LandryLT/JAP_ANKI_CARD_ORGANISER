@@ -63,8 +63,10 @@ if load_from_cache:
 else:
     # Make new Kanji Card   
     existing_kanjis = get_existing_kanji_list(anki_col)
-    for k in get_new_kanjis(existing_kanjis, JDIC_words):
-        print("new Kanji: " + k + " !")
+    new_kanjis =  get_new_kanjis(existing_kanjis, JDIC_words)
+    for k in new_kanjis:
+        loadingPct = round((new_kanjis.index(k)/len(new_kanjis))*10000)/100
+        print("new Kanji: " + k + " !\t\t" + str(loadingPct)+"%")
         NewKanjiCards.append(NewKanji(k))
     save_secure_pickle(NewKanjiCards, kanji_cache)
 
