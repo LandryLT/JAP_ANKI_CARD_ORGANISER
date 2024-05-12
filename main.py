@@ -27,7 +27,8 @@ else:
 
     # WWWJDIC the words to add
     for w in words_to_add:
-        print("WWWJDIC-ing " + w)
+        loadingPct = round((words_to_add.index(w)/len(words_to_add))*10000)/100
+        print("WWWJDIC-ing " + w +"\t\t" + str(loadingPct) +"%")
         excludedIDs = []
         prerenderedSoup = None
         # Multipass until NoMoreHits
